@@ -1,207 +1,226 @@
 # Parking System - Interactive Prototypes
 
-这是一个由多个相互交互的停车系统原型组成的项目：
-- **App**: 模拟手机停车应用界面
-- **Infotainment**: 车载信息娱乐系统界面
-- **WizardOfOz**: 研究人员控制面板，用于触发停车模拟
-- **Backend**: WebSocket 服务器，实现所有应用的实时通信
+This is a multi-app interactive parking system prototype project consisting of:
+- **App**: Mobile parking application interface
+- **Infotainment**: In-car infotainment system interface
+- **WizardOfOz**: Researcher control panel for triggering parking simulations
+- **Backend**: WebSocket server enabling real-time communication between all apps
 
-## 🎯 功能演示
+## 🎯 Feature Demo
 
-### 交互流程
+### Interaction Flow
 
-#### 方式 1: 使用 Wizard of Oz 控制面板（推荐用于实验）
+#### Method 1: Using Wizard of Oz Control Panel (Recommended for Research)
 
-1. **WizardOfOz** → 点击 "Start Parking Simulation" 按钮
-   - **App** 自动跳转到活动会话页面 (`/active`)
-   - **Infotainment** 自动跳转到会话开始页面 (`/session-started`)
+1. **WizardOfOz** → Click "Start Parking Simulation" button
+   - **App** automatically navigates to active session page (`/active`)
+   - **Infotainment** automatically navigates to session started page (`/session-started`)
 
-2. **Infotainment (Session Active)** → 点击 "End Session" 按钮
-   - **App** 自动跳转到付款页面 (`/payment`)
-   - **Infotainment** 跳转到会话结束页面 (`/end-session`)
+2. **WizardOfOz** → Click "User Leaves Car" button
+   - **Infotainment** screen goes completely black (`/black-screen`)
+   - **App** remains unchanged
 
-#### 方式 2: 使用 Infotainment 手动触发（开发调试用）
+3. **WizardOfOz** → Click "User Returns to Car" button
+   - **Infotainment** displays session-active page (`/session-active`)
+   - **App** remains unchanged
 
-1. **Infotainment (Main Page)** → 点击 "Simulate Park On" 按钮
-   - **App** 自动跳转到确认页面 (`/confirm`)
-   - **Infotainment** 跳转到停车确认页面 (`/parking-confirmation`)
+4. **WizardOfOz** → Click "15 Minutes Have Passed" button
+   - **App** shows payment notification
+   - **Infotainment** remains unchanged
 
-2. **Infotainment (Parking Confirmation)** → 点击 "Confirm" 按钮
-   - **App** 自动跳转到活动会话页面 (`/active`)
-   - **Infotainment** 跳转到会话开始页面 (`/session-started`)
+5. **Infotainment (Session Active)** → Click "End Session" button
+   - **App** automatically navigates to payment page (`/payment`)
+   - **Infotainment** navigates to session end page (`/end-session`)
 
-3. **Infotainment (Session Active)** → 点击 "End Session" 按钮
-   - **App** 自动跳转到付款页面 (`/payment`)
-   - **Infotainment** 跳转到会话结束页面 (`/end-session`)
+#### Method 2: Manual Trigger from Infotainment (For Development/Debugging)
 
-## 🏗️ 项目结构
+1. **Infotainment (Main Page)** → Navigate to parking confirmation
+   - **App** can navigate to confirm page (`/confirm`)
+   - **Infotainment** goes to parking confirmation page (`/parking-confirmation`)
+
+2. **Infotainment (Parking Confirmation)** → Click "Confirm" button
+   - **App** automatically navigates to active session page (`/active`)
+   - **Infotainment** navigates to session started page (`/session-started`)
+
+3. **Infotainment (Session Active)** → Click "End Session" button
+   - **App** automatically navigates to payment page (`/payment`)
+   - **Infotainment** navigates to session end page (`/end-session`)
+
+## 🏗️ Project Structure
 
 ```
 205Web/
-├── App/                    # 手机应用前端 (React + TypeScript + Vite)
+├── App/                    # Mobile app frontend (React + TypeScript + Vite)
 │   ├── src/
 │   │   ├── app/
 │   │   │   ├── hooks/
-│   │   │   │   └── useWebSocket.ts    # WebSocket 客户端 hook
-│   │   │   ├── pages/                 # 页面组件
+│   │   │   │   └── useWebSocket.ts    # WebSocket client hook
+│   │   │   ├── pages/                 # Page components
 │   │   │   └── App.tsx
 │   │   └── main.tsx
 │   ├── Dockerfile
 │   ├── nginx.conf
 │   └── package.json
 │
-├── Infotainment/          # 车载系统前端 (React + TypeScript + Vite)
+├── Infotainment/          # In-car system frontend (React + TypeScript + Vite)
 │   ├── src/
 │   │   ├── app/
 │   │   │   ├── hooks/
-│   │   │   │   └── useWebSocket.ts    # WebSocket 客户端 hook
+│   │   │   │   └── useWebSocket.ts    # WebSocket client hook
 │   │   │   ├── components/
-│   │   │   │   ├── MainPage.tsx       # 主页面 (带 Simulate Park On 按钮)
+│   │   │   │   ├── MainPage.tsx       # Main page
 │   │   │   │   ├── ParkingConfirmation.tsx
-│   │   │   │   └── SessionActive.tsx
+│   │   │   │   ├── SessionActive.tsx
+│   │   │   │   └── BlackScreen.tsx    # Black screen for user leaving car
 │   │   │   └── App.tsx
 │   │   └── main.tsx
 │   ├── Dockerfile
 │   ├── nginx.conf
 │   └── package.json
 │
-├── WizardOfOz/            # 研究人员控制面板 (React + TypeScript + Vite)
+├── WizardOfOz/            # Researcher control panel (React + TypeScript + Vite)
 │   ├── src/
-│   │   ├── App.tsx                    # 主界面（停车模拟控制按钮）
-│   │   ├── useWebSocket.ts            # WebSocket 客户端 hook
+│   │   ├── App.tsx                    # Main interface (parking simulation control buttons)
+│   │   ├── useWebSocket.ts            # WebSocket client hook
 │   │   └── main.tsx
 │   ├── Dockerfile
 │   ├── nginx.conf
 │   ├── package.json
-│   └── README.md                      # WoZ 使用说明
+│   └── README.md                      # WoZ usage instructions
 │
-├── backend/               # WebSocket 后端服务器 (Node.js + Express + ws)
+├── backend/               # WebSocket backend server (Node.js + Express + ws)
 │   ├── src/
-│   │   └── server.js                  # WebSocket 服务器主文件
+│   │   └── server.js                  # WebSocket server main file
 │   ├── Dockerfile
 │   └── package.json
 │
-├── docker-compose.yml     # Docker Compose 配置
-└── README.md             # 本文件
+├── docker-compose.yml     # Docker Compose configuration
+└── README.md             # This file
 ```
 
-## 🚀 部署方式
+## 🚀 Deployment Options
 
-### 🌟 方式 1: GitHub + Google Cloud Run (推荐用于演示)
+### 🌟 Option 1: GitHub + Google Cloud Run (Recommended for Demo)
 
-**最简单的方式！** 通过 GitHub 仓库直接部署到 Google Cloud Run，支持自动更新。
+**Easiest way!** Deploy directly to Google Cloud Run from GitHub repository with automatic updates.
 
-👉 **[查看详细步骤：DEPLOY_GITHUB.md](./DEPLOY_GITHUB.md)**
+👉 **[See detailed steps: DEPLOY_CLOUDRUN_UPDATED.md](./DEPLOY_CLOUDRUN_UPDATED.md)**
 
-**步骤概览:**
-1. 推送代码到 GitHub
-2. 在 Cloud Run 控制台点击 "Deploy from repository"
-3. 连接 GitHub 仓库
-4. 配置 Dockerfile 路径和环境变量
-5. 完成！自动获得公网访问 URL
+**Overview:**
+1. Push code to GitHub
+2. Click "Deploy from repository" in Cloud Run console
+3. Connect GitHub repository
+4. Configure Dockerfile path and environment variables
+5. Done! Get public URL automatically
 
-**优点:**
-- ✅ 自动部署（推送代码即更新）
-- ✅ 公网访问（可以在手机上测试）
-- ✅ 免费额度（原型演示完全够用）
-- ✅ 无需本地 Docker
+**Benefits:**
+- ✅ Automatic deployment (updates on push)
+- ✅ Public access (test on mobile devices)
+- ✅ Free tier (sufficient for prototype demos)
+- ✅ No local Docker required
 
 ---
 
-### 方式 2: 本地 Docker Compose (推荐用于开发)
+### Option 2: Local Docker Compose (Recommended for Development)
 
-**前提条件:**
-- 安装 [Docker](https://www.docker.com/get-started) 和 Docker Compose
+**Prerequisites:**
+- Install [Docker](https://www.docker.com/get-started) and Docker Compose
 
-**步骤:**
+**Steps:**
 
 ```bash
-# 1. 进入项目目录
+# 1. Navigate to project directory
 cd /Users/guanruijia/Desktop/205Web
 
-# 2. 构建并启动所有服务
+# 2. Build and start all services
 docker-compose up --build
 
-# 3. 访问应用
-# - App (手机应用): http://localhost:3000
-# - Infotainment (车载系统): http://localhost:3002
-# - WizardOfOz (研究人员控制面板): http://localhost:3003
-# - Backend (WebSocket 服务器): ws://localhost:3001
+# 3. Access applications
+# - App (Mobile): http://localhost:3000
+# - Infotainment (In-car): http://localhost:3002
+# - WizardOfOz (Control Panel): http://localhost:3003
+# - Backend (WebSocket): ws://localhost:3001
 ```
 
-**停止服务:**
+**Stop services:**
 ```bash
 docker-compose down
 ```
 
-### 方法 2: 手动安装和运行
+### Option 3: Manual Installation and Run
 
-**前提条件:**
-- Node.js 18+ 和 npm
+**Prerequisites:**
+- Node.js 18+ and npm
 
-**步骤:**
+**Steps:**
 
 ```bash
-# 1. 安装并启动后端服务器
+# 1. Install and start backend server
 cd backend
 npm install
 npm start
-# 后端运行在 http://localhost:3001
+# Backend runs at http://localhost:3001
 
-# 2. 新开一个终端，安装并启动 App
+# 2. Open new terminal, install and start App
 cd App
 npm install
 npm run dev
-# App 运行在 http://localhost:5173
+# App runs at http://localhost:5173
 
-# 3. 新开一个终端，安装并启动 Infotainment
+# 3. Open new terminal, install and start Infotainment
 cd Infotainment
 npm install
 npm run dev
-# Infotainment 运行在 http://localhost:5174
+# Infotainment runs at http://localhost:5174
+
+# 4. Open new terminal, install and start WizardOfOz
+cd WizardOfOz
+npm install
+npm run dev
+# WizardOfOz runs at http://localhost:5175
 ```
 
 ---
 
-## 📚 更多部署选项
+## 📚 More Deployment Options
 
-如果你想使用命令行工具（gcloud CLI）进行部署，可以运行：
+If you want to use command-line tools (gcloud CLI) for deployment, you can run:
 
 ```bash
 ./deploy-gcloud.sh
 ```
 
-但推荐使用 **GitHub + Cloud Run** 的方式（见 [DEPLOY_GITHUB.md](./DEPLOY_GITHUB.md)），更简单且支持自动部署。
+However, the **GitHub + Cloud Run** method is recommended (see [DEPLOY_CLOUDRUN_UPDATED.md](./DEPLOY_CLOUDRUN_UPDATED.md)) as it's simpler and supports automatic deployment.
 
-## 🛠️ 技术栈
+## 🛠️ Tech Stack
 
-### Frontend (App & Infotainment)
-- **框架**: React 18.3.1
-- **语言**: TypeScript
-- **构建工具**: Vite 6.3.5
-- **样式**: Tailwind CSS 4.1.12
-- **UI 组件**: Radix UI + shadcn/ui
-- **路由**: React Router 7.13.0
-- **通信**: WebSocket (原生 API)
+### Frontend (App, Infotainment & WizardOfOz)
+- **Framework**: React 18.3.1
+- **Language**: TypeScript
+- **Build Tool**: Vite 6.3.5
+- **Styling**: Tailwind CSS 4.1.12
+- **UI Components**: Radix UI + shadcn/ui
+- **Routing**: React Router 7.13.0
+- **Communication**: WebSocket (Native API)
 
 ### Backend
-- **运行时**: Node.js 20
-- **框架**: Express 4.18.2
+- **Runtime**: Node.js 20
+- **Framework**: Express 4.18.2
 - **WebSocket**: ws 8.16.0
-- **跨域**: CORS 2.8.5
+- **CORS**: CORS 2.8.5
 
-### 部署
-- **容器化**: Docker + Docker Compose
-- **Web 服务器**: Nginx (生产环境)
-- **云平台**: Google Cloud Run
+### Deployment
+- **Containerization**: Docker + Docker Compose
+- **Web Server**: Nginx (production)
+- **Cloud Platform**: Google Cloud Run
 
-## 🔧 环境变量
+## 🔧 Environment Variables
 
-### App & Infotainment
+### App, Infotainment & WizardOfOz
 ```env
-VITE_WS_URL=ws://localhost:3001  # 本地开发
-# 或
-VITE_WS_URL=wss://your-backend.run.app  # 生产环境
+VITE_WS_URL=ws://localhost:3001  # Local development
+# or
+VITE_WS_URL=wss://your-backend.run.app  # Production
 ```
 
 ### Backend
@@ -209,50 +228,51 @@ VITE_WS_URL=wss://your-backend.run.app  # 生产环境
 PORT=3001
 ```
 
-## 📝 开发注意事项
+## 📝 Development Notes
 
-1. **WebSocket 连接**
-   - 开发环境使用 `ws://localhost:3001`
-   - 生产环境使用 `wss://your-backend-url`
-   - 连接断开后会自动重连（3秒延迟）
+1. **WebSocket Connection**
+   - Development: Use `ws://localhost:3001`
+   - Production: Use `wss://your-backend-url`
+   - Auto-reconnect on disconnect (3s delay)
 
-2. **跨域问题**
-   - 后端已配置 CORS，允许所有来源
-   - 生产环境建议限制特定域名
+2. **CORS Issues**
+   - Backend configured with CORS allowing all origins
+   - Production: Recommend restricting to specific domains
 
-3. **状态同步**
-   - WebSocket 事件是单向广播
-   - 前端通过事件触发导航
-   - 后端不存储会话状态（无状态设计）
+3. **State Synchronization**
+   - WebSocket events are one-way broadcasts
+   - Frontend triggers navigation via events
+   - Backend does not store session state (stateless design)
 
-## 🐛 故障排除
+## 🐛 Troubleshooting
 
-### WebSocket 连接失败
+### WebSocket Connection Failed
 ```bash
-# 检查后端是否运行
+# Check if backend is running
 curl http://localhost:3001/health
 
-# 查看浏览器控制台 WebSocket 连接状态
-# 应该看到 "WebSocket connected to backend"
+# Check browser console for WebSocket connection status
+# Should see "WebSocket connected to backend"
 ```
 
-### Docker 构建失败
+### Docker Build Failed
 ```bash
-# 清理 Docker 缓存
+# Clean Docker cache
 docker system prune -a
 
-# 重新构建
+# Rebuild
 docker-compose build --no-cache
 ```
 
-### 端口冲突
+### Port Conflicts
 ```bash
-# 检查端口占用
+# Check port usage
 lsof -i :3000
 lsof -i :3001
 lsof -i :3002
+lsof -i :3003
 
-# 终止占用端口的进程
+# Kill process using port
 kill -9 <PID>
 ```
 
@@ -260,16 +280,17 @@ kill -9 <PID>
 
 MIT License
 
-## 👥 作者
+## 👥 Author
 
 Hannah Guan
 
 ---
 
-**快速开始:**
+**Quick Start:**
 ```bash
 docker-compose up --build
 ```
-然后打开:
+Then open:
 - App: http://localhost:3000
 - Infotainment: http://localhost:3002
+- WizardOfOz: http://localhost:3003

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router';
+import { toast } from 'sonner';
 
 // 生产环境 WebSocket URL
 const WS_URL = import.meta.env.VITE_WS_URL ||
@@ -47,26 +48,12 @@ export function useWebSocket() {
               navigate('/payment');
               break;
             case 'SHOW_PAYMENT_NOTIFICATION':
-              // Show notification prompting user to pay for parking
-              if ('Notification' in window) {
-                if (Notification.permission === 'granted') {
-                  new Notification('Parking Payment Reminder', {
-                    body: 'Please pay for your parking session.',
-                    icon: '/icon.png'
-                  });
-                } else if (Notification.permission !== 'denied') {
-                  Notification.requestPermission().then((permission) => {
-                    if (permission === 'granted') {
-                      new Notification('Parking Payment Reminder', {
-                        body: 'Please pay for your parking session.',
-                        icon: '/icon.png'
-                      });
-                    }
-                  });
-                }
-              }
-              // Also show an alert as fallback
-              alert('Parking Payment Reminder: Please pay for your parking session.');
+              // Show in-app notification prompting user to pay for parking
+              toast.warning('Payment Reminder', {
+                description: 'Please pay for your parking session.',
+                duration: 10000,
+                position: 'top-center',
+              });
               break;
             default:
               console.log('Unhandled event:', data.event);
