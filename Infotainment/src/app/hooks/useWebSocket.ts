@@ -1,7 +1,11 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 
-const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3001';
+// 生产环境 WebSocket URL
+const WS_URL = import.meta.env.VITE_WS_URL ||
+  (window.location.hostname === 'localhost'
+    ? 'ws://localhost:3001'
+    : 'wss://parking-system-189958237522.us-central1.run.app');
 
 interface WebSocketMessage {
   event: string;
