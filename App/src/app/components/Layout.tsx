@@ -31,11 +31,13 @@ export default function Layout() {
         <main className="flex-1 relative overflow-hidden flex flex-col bg-gray-50 rounded-[3rem] mask-image-fill">
           <Outlet />
         </main>
-        
+
         {/* Home Indicator */}
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-36 h-1.5 bg-gray-900/20 rounded-full z-50 pointer-events-none mix-blend-difference invert" />
+
+        {/* Toast Notifications - Inside phone UI */}
+        <Toaster position="top-center" />
       </div>
-      <Toaster position="top-center" />
     </div>
   );
 }
