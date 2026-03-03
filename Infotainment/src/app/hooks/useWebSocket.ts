@@ -40,6 +40,12 @@ export function useWebSocket() {
             case 'NAVIGATE_TO_SESSION_STARTED':
               navigate('/session-started');
               break;
+            case 'GO_BLACK':
+              navigate('/black-screen');
+              break;
+            case 'NAVIGATE_TO_SESSION_ACTIVE':
+              navigate('/session-active');
+              break;
             default:
               console.log('Unhandled event:', data.event);
           }

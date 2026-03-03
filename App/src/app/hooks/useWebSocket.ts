@@ -46,6 +46,28 @@ export function useWebSocket() {
             case 'NAVIGATE_TO_PAYMENT':
               navigate('/payment');
               break;
+            case 'SHOW_PAYMENT_NOTIFICATION':
+              // Show notification prompting user to pay for parking
+              if ('Notification' in window) {
+                if (Notification.permission === 'granted') {
+                  new Notification('Parking Payment Reminder', {
+                    body: 'Please pay for your parking session.',
+                    icon: '/icon.png'
+                  });
+                } else if (Notification.permission !== 'denied') {
+                  Notification.requestPermission().then((permission) => {
+                    if (permission === 'granted') {
+                      new Notification('Parking Payment Reminder', {
+                        body: 'Please pay for your parking session.',
+                        icon: '/icon.png'
+                      });
+                    }
+                  });
+                }
+              }
+              // Also show an alert as fallback
+              alert('Parking Payment Reminder: Please pay for your parking session.');
+              break;
             default:
               console.log('Unhandled event:', data.event);
           }

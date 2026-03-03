@@ -6,7 +6,7 @@ import { SessionStarted } from "./components/SessionStarted";
 import { SessionActive } from "./components/SessionActive";
 import { EndSession } from "./components/EndSession";
 import { SessionReview } from "./components/SessionReview";
-import { StageSelector } from "./components/StageSelector";
+import { BlackScreen } from "./components/BlackScreen";
 
 export const router = createBrowserRouter([
   {
@@ -15,10 +15,6 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        Component: StageSelector,
-      },
-      {
-        path: "main",
         Component: MainPage,
       },
       {
@@ -40,6 +36,10 @@ export const router = createBrowserRouter([
       {
         path: "session-review",
         Component: SessionReview,
+      },
+      {
+        path: "black-screen",
+        Component: BlackScreen,
       },
     ],
   },

@@ -1,31 +1,8 @@
 import { Info, Car, Coins, Home, Music, Navigation } from "lucide-react";
-import { Button } from "./ui/button";
-import { useNavigate } from "react-router";
-import { useEffect } from "react";
 import { Card } from "./ui/card";
 import { ParkingSquare } from "lucide-react";
-import { useWebSocket } from "../hooks/useWebSocket";
 
 export function MainPage() {
-  const navigate = useNavigate();
-  const { sendMessage } = useWebSocket();
-
-  const handleSimulateParkOn = () => {
-    sendMessage({ event: 'SIMULATE_PARK_ON' });
-    navigate("/parking-confirmation");
-  };
-
-  useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
-      if (event.code === "Space") {
-        event.preventDefault();
-        handleSimulateParkOn();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [navigate]);
 
   return (
     <div className="relative h-screen w-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-800 overflow-hidden">
@@ -64,12 +41,6 @@ export function MainPage() {
               <div className="mt-2 px-5 py-2 bg-green-500/30 text-green-200 rounded-full text-sm font-semibold border border-green-400/50">
                 Available
               </div>
-              <Button
-                onClick={handleSimulateParkOn}
-                className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-lg"
-              >
-                Simulate Park On
-              </Button>
             </Card>
 
             {/* Tolling Service */}

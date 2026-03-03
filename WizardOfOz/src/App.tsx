@@ -1,4 +1,4 @@
-import { Play, Wifi, WifiOff } from 'lucide-react';
+import { Play, Wifi, WifiOff, LogOut, LogIn, Clock } from 'lucide-react';
 import { useWebSocket } from './useWebSocket';
 
 function App() {
@@ -7,6 +7,18 @@ function App() {
   const handleStartSimulation = () => {
     // Send START_SESSION event to backend (same as Infotainment does)
     sendMessage({ event: 'START_SESSION' });
+  };
+
+  const handleUserLeavesCar = () => {
+    sendMessage({ event: 'USER_LEAVES_CAR' });
+  };
+
+  const handleUserReturnsCar = () => {
+    sendMessage({ event: 'USER_RETURNS_CAR' });
+  };
+
+  const handlePaymentReminder = () => {
+    sendMessage({ event: 'PAYMENT_REMINDER' });
   };
 
   return (
@@ -60,7 +72,7 @@ function App() {
                 </p>
               </div>
 
-              {/* Action Button */}
+              {/* Action Buttons */}
               <button
                 onClick={handleStartSimulation}
                 disabled={!isConnected}
@@ -76,6 +88,60 @@ function App() {
               >
                 <Play className="w-6 h-6" />
                 Start Parking Simulation
+              </button>
+
+              {/* User Leaves Car Button */}
+              <button
+                onClick={handleUserLeavesCar}
+                disabled={!isConnected}
+                className={`
+                  w-full py-6 rounded-xl font-bold text-lg
+                  flex items-center justify-center gap-3
+                  transition-all duration-200 transform
+                  ${isConnected
+                    ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95'
+                    : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  }
+                `}
+              >
+                <LogOut className="w-6 h-6" />
+                User Leaves Car
+              </button>
+
+              {/* User Returns Car Button */}
+              <button
+                onClick={handleUserReturnsCar}
+                disabled={!isConnected}
+                className={`
+                  w-full py-6 rounded-xl font-bold text-lg
+                  flex items-center justify-center gap-3
+                  transition-all duration-200 transform
+                  ${isConnected
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95'
+                    : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  }
+                `}
+              >
+                <LogIn className="w-6 h-6" />
+                User Returns to Car
+              </button>
+
+              {/* 15 Minutes Have Passed Button */}
+              <button
+                onClick={handlePaymentReminder}
+                disabled={!isConnected}
+                className={`
+                  w-full py-6 rounded-xl font-bold text-lg
+                  flex items-center justify-center gap-3
+                  transition-all duration-200 transform
+                  ${isConnected
+                    ? 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95'
+                    : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  }
+                `}
+              >
+                <Clock className="w-6 h-6" />
+                15 Minutes Have Passed
               </button>
 
               {/* Status Info */}

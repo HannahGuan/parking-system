@@ -19,7 +19,8 @@ const wss = new WebSocketServer({ server });
 // Store connected clients with their types
 const clients = {
   app: new Set(),
-  infotainment: new Set()
+  infotainment: new Set(),
+  'wizard-of-oz': new Set()
 };
 
 // Health check endpoint
@@ -90,6 +91,33 @@ wss.on('connection', (ws, req) => {
           console.log('Broadcasting END_SESSION to App clients');
           broadcast(clients.app, {
             event: 'NAVIGATE_TO_PAYMENT',
+            timestamp: Date.now()
+          });
+          break;
+
+        case 'USER_LEAVES_CAR':
+          // WizardOfOz triggers this -> Infotainment goes black
+          console.log('Broadcasting GO_BLACK to Infotainment clients');
+          broadcast(clients.infotainment, {
+            event: 'GO_BLACK',
+            timestamp: Date.now()
+          });
+          break;
+
+        case 'USER_RETURNS_CAR':
+          // WizardOfOz triggers this -> Infotainment shows session-active
+          console.log('Broadcasting NAVIGATE_TO_SESSION_ACTIVE to Infotainment clients');
+          broadcast(clients.infotainment, {
+            event: 'NAVIGATE_TO_SESSION_ACTIVE',
+            timestamp: Date.now()
+          });
+          break;
+
+        case 'PAYMENT_REMINDER':
+          // WizardOfOz triggers this -> App shows notification
+          console.log('Broadcasting SHOW_PAYMENT_NOTIFICATION to App clients');
+          broadcast(clients.app, {
+            event: 'SHOW_PAYMENT_NOTIFICATION',
             timestamp: Date.now()
           });
           break;

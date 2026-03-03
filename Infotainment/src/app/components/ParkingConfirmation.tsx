@@ -89,6 +89,7 @@ export function ParkingConfirmation() {
             {/* Action Buttons */}
             <div className="grid grid-cols-2 gap-4">
               <Button
+                onClick={() => navigate('/')}
                 variant="outline"
                 className="bg-white border-2 border-gray-400 hover:bg-gray-100 text-gray-800 font-semibold py-6 rounded-lg"
               >
