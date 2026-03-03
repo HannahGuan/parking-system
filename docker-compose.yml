@@ -47,6 +47,22 @@ services:
     networks:
       - parking-network
 
+  # Wizard of Oz Control Panel
+  wizard-of-oz:
+    build:
+      context: ./WizardOfOz
+      dockerfile: Dockerfile
+      args:
+        - VITE_WS_URL=ws://localhost:3001
+    container_name: parking-wizard-of-oz
+    ports:
+      - "3003:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - parking-network
+
 networks:
   parking-network:
     driver: bridge

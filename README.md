@@ -1,13 +1,26 @@
 # Parking System - Interactive Prototypes
 
-这是一个由两个相互交互的停车系统原型组成的项目：
+这是一个由多个相互交互的停车系统原型组成的项目：
 - **App**: 模拟手机停车应用界面
 - **Infotainment**: 车载信息娱乐系统界面
-- **Backend**: WebSocket 服务器，实现两个应用的实时通信
+- **WizardOfOz**: 研究人员控制面板，用于触发停车模拟
+- **Backend**: WebSocket 服务器，实现所有应用的实时通信
 
 ## 🎯 功能演示
 
 ### 交互流程
+
+#### 方式 1: 使用 Wizard of Oz 控制面板（推荐用于实验）
+
+1. **WizardOfOz** → 点击 "Start Parking Simulation" 按钮
+   - **App** 自动跳转到活动会话页面 (`/active`)
+   - **Infotainment** 自动跳转到会话开始页面 (`/session-started`)
+
+2. **Infotainment (Session Active)** → 点击 "End Session" 按钮
+   - **App** 自动跳转到付款页面 (`/payment`)
+   - **Infotainment** 跳转到会话结束页面 (`/end-session`)
+
+#### 方式 2: 使用 Infotainment 手动触发（开发调试用）
 
 1. **Infotainment (Main Page)** → 点击 "Simulate Park On" 按钮
    - **App** 自动跳转到确认页面 (`/confirm`)
@@ -51,6 +64,16 @@
 │   ├── Dockerfile
 │   ├── nginx.conf
 │   └── package.json
+│
+├── WizardOfOz/            # 研究人员控制面板 (React + TypeScript + Vite)
+│   ├── src/
+│   │   ├── App.tsx                    # 主界面（停车模拟控制按钮）
+│   │   ├── useWebSocket.ts            # WebSocket 客户端 hook
+│   │   └── main.tsx
+│   ├── Dockerfile
+│   ├── nginx.conf
+│   ├── package.json
+│   └── README.md                      # WoZ 使用说明
 │
 ├── backend/               # WebSocket 后端服务器 (Node.js + Express + ws)
 │   ├── src/
@@ -102,6 +125,7 @@ docker-compose up --build
 # 3. 访问应用
 # - App (手机应用): http://localhost:3000
 # - Infotainment (车载系统): http://localhost:3002
+# - WizardOfOz (研究人员控制面板): http://localhost:3003
 # - Backend (WebSocket 服务器): ws://localhost:3001
 ```
 

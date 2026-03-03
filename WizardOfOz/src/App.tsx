@@ -1,0 +1,104 @@
+import { Play, Wifi, WifiOff } from 'lucide-react';
+import { useWebSocket } from './useWebSocket';
+
+function App() {
+  const { sendMessage, isConnected } = useWebSocket();
+
+  const handleStartSimulation = () => {
+    // Send START_SESSION event to backend (same as Infotainment does)
+    sendMessage({ event: 'START_SESSION' });
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Connection Status */}
+      <div className="absolute top-4 right-4">
+        <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${
+          isConnected
+            ? 'bg-green-500/20 text-green-400'
+            : 'bg-red-500/20 text-red-400'
+        }`}>
+          {isConnected ? (
+            <>
+              <Wifi className="w-4 h-4" />
+              <span className="text-sm font-medium">Connected</span>
+            </>
+          ) : (
+            <>
+              <WifiOff className="w-4 h-4" />
+              <span className="text-sm font-medium">Disconnected</span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex items-center justify-center min-h-screen p-8">
+        <div className="w-full max-w-2xl">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-white mb-3">
+              Wizard of Oz Control Panel
+            </h1>
+            <p className="text-purple-300 text-lg">
+              Parking Simulation Controller
+            </p>
+          </div>
+
+          {/* Control Card */}
+          <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-white/20">
+            <div className="space-y-6">
+              {/* Info Section */}
+              <div className="bg-purple-500/20 rounded-lg p-6 border border-purple-400/30">
+                <h2 className="text-white font-semibold text-lg mb-2">
+                  Simulation Control
+                </h2>
+                <p className="text-purple-200 text-sm">
+                  Click the button below to trigger the parking simulation.
+                  This will send a START_SESSION event to all connected clients
+                  (Infotainment and App).
+                </p>
+              </div>
+
+              {/* Action Button */}
+              <button
+                onClick={handleStartSimulation}
+                disabled={!isConnected}
+                className={`
+                  w-full py-6 rounded-xl font-bold text-lg
+                  flex items-center justify-center gap-3
+                  transition-all duration-200 transform
+                  ${isConnected
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95'
+                    : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  }
+                `}
+              >
+                <Play className="w-6 h-6" />
+                Start Parking Simulation
+              </button>
+
+              {/* Status Info */}
+              <div className="text-center">
+                <p className="text-sm text-purple-300">
+                  {isConnected
+                    ? 'Ready to start simulation'
+                    : 'Waiting for WebSocket connection...'}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer Info */}
+          <div className="mt-8 text-center">
+            <p className="text-sm text-purple-400">
+              For research use only - Controls parking notification flow
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default App;
