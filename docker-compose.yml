@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # Backend WebSocket Server
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: parking-backend
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+    restart: unless-stopped
+    networks:
+      - parking-network
+
+  # Mobile App Frontend
+  app:
+    build:
+      context: ./App
+      dockerfile: Dockerfile
+      args:
+        - VITE_WS_URL=ws://localhost:3001
+    container_name: parking-app
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - parking-network
+
+  # Infotainment Frontend
+  infotainment:
+    build:
+      context: ./Infotainment
+      dockerfile: Dockerfile
+      args:
+        - VITE_WS_URL=ws://localhost:3001
+    container_name: parking-infotainment
+    ports:
+      - "3002:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - parking-network
+
+networks:
+  parking-network:
+    driver: bridge

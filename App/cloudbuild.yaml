@@ -1,0 +1,50 @@
+# Cloud Build configuration for App frontend
+steps:
+  # Build the Docker image with build args
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '--build-arg'
+      - 'VITE_WS_URL=${_VITE_WS_URL}'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/parking-app:$COMMIT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/parking-app:latest'
+      - '.'
+    dir: 'App'
+
+  # Push the image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/parking-app:$COMMIT_SHA'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/parking-app:latest'
+
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'parking-app'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/parking-app:$COMMIT_SHA'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--port'
+      - '80'
+
+# Substitution variables (set in Cloud Build trigger)
+substitutions:
+  _VITE_WS_URL: 'wss://parking-backend-xxx.run.app'  # Update this with your backend URL
+
+images:
+  - 'gcr.io/$PROJECT_ID/parking-app:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/parking-app:latest'
