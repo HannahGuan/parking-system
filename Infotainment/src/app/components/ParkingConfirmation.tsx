@@ -2,7 +2,7 @@ import 'leaflet/dist/leaflet.css';
 import { Info, MapPin, DollarSign, CreditCard } from "lucide-react";
 import { Button } from "./ui/button";
 import { useNavigate } from "react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { MapContainer, TileLayer, CircleMarker, Circle, useMap } from 'react-leaflet';
 import { useWebSocket } from "../hooks/useWebSocket";
 import { DurationSelector } from "./DurationSelector";
@@ -21,12 +21,39 @@ function MapController({ coords }: { coords: { lat: number; lng: number } | null
   return null;
 }
 
+// Haversine distance in feet
+function distanceFeet(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+  const R = 20902231; // Earth radius in feet
+  const dLat = (b.lat - a.lat) * Math.PI / 180;
+  const dLng = (b.lng - a.lng) * Math.PI / 180;
+  const sin2 = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * Math.PI / 180) * Math.cos(b.lat * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(sin2));
+}
+
 export function ParkingConfirmation() {
   const navigate = useNavigate();
   const { sendMessage } = useWebSocket();
-  const [coords] = useState<{ lat: number; lng: number }>(LITTLEFIELD);
+  const [coords, setCoords] = useState<{ lat: number; lng: number }>(LITTLEFIELD);
   const [duration, setDuration] = useState(60);
   const RATE_PER_HOUR = 2.50;
+  const lastCoords = useRef<{ lat: number; lng: number } | null>(null);
+
+  // Real-time GPS tracking
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    const watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        if (pos.coords.accuracy > 50) return;
+        const next = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        if (lastCoords.current && distanceFeet(lastCoords.current, next) < 3) return;
+        lastCoords.current = next;
+        setCoords(next);
+      },
+      () => {},
+      { enableHighAccuracy: true }
+    );
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, []);
 
   const handleConfirm = () => {
     // Send START_SESSION event to backend with duration

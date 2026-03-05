@@ -2,7 +2,7 @@ import 'leaflet/dist/leaflet.css';
 import { Car, MapPin } from "lucide-react";
 import { Button } from "./ui/button";
 import { useNavigate } from "react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { MapContainer, TileLayer, CircleMarker, Circle, useMap } from 'react-leaflet';
 
 const DEFAULT_CENTER: [number, number] = [37.4275, -122.1697];
@@ -19,9 +19,36 @@ function MapController({ coords }: { coords: { lat: number; lng: number } | null
   return null;
 }
 
+// Haversine distance in feet
+function distanceFeet(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+  const R = 20902231; // Earth radius in feet
+  const dLat = (b.lat - a.lat) * Math.PI / 180;
+  const dLng = (b.lng - a.lng) * Math.PI / 180;
+  const sin2 = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * Math.PI / 180) * Math.cos(b.lat * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(sin2));
+}
+
 export function SpotFoundNotification() {
   const navigate = useNavigate();
-  const [coords] = useState<{ lat: number; lng: number }>(LITTLEFIELD);
+  const [coords, setCoords] = useState<{ lat: number; lng: number }>(LITTLEFIELD);
+  const lastCoords = useRef<{ lat: number; lng: number } | null>(null);
+
+  // Real-time GPS tracking (like App)
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    const watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        if (pos.coords.accuracy > 50) return; // ignore low-accuracy fixes
+        const next = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        if (lastCoords.current && distanceFeet(lastCoords.current, next) < 3) return; // ignore noise
+        lastCoords.current = next;
+        setCoords(next);
+      },
+      () => {},
+      { enableHighAccuracy: true }
+    );
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, []);
 
   const handleParkHere = () => {
     navigate('/parking-confirmation');
@@ -47,9 +74,9 @@ export function SpotFoundNotification() {
   }, []);
 
   return (
-    <div className="relative h-screen w-screen bg-gray-900 overflow-hidden">
+    <div className="fixed inset-0 z-[9999] h-screen w-screen bg-gray-900 overflow-hidden">
       {/* Map Background */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 z-0">
         <MapContainer
           center={DEFAULT_CENTER}
           zoom={DEFAULT_ZOOM}
@@ -75,10 +102,10 @@ export function SpotFoundNotification() {
       </div>
 
       {/* Overlay Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-gray-900/90 pointer-events-none" />
+      <div className="absolute inset-0 z-10 bg-gradient-to-b from-transparent via-transparent to-gray-900/90 pointer-events-none" />
 
       {/* Notification Card at Bottom */}
-      <div className="absolute bottom-0 left-0 right-0 flex items-end justify-center p-8">
+      <div className="absolute bottom-0 left-0 right-0 z-20 flex items-end justify-center p-8">
         <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden">
           {/* Header */}
           <div className="bg-emerald-600 px-8 py-6 flex items-center gap-4">
