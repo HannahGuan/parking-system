@@ -13,10 +13,12 @@ interface WebSocketMessage {
   [key: string]: any;
 }
 
-export function useWebSocket() {
+export function useWebSocket(onSpotFound?: () => void) {
   const ws = useRef<WebSocket | null>(null);
   const navigate = useNavigate();
   const reconnectTimeout = useRef<NodeJS.Timeout>();
+  const onSpotFoundRef = useRef(onSpotFound);
+  useEffect(() => { onSpotFoundRef.current = onSpotFound; }, [onSpotFound]);
 
   const connect = useCallback(() => {
     try {
@@ -54,6 +56,9 @@ export function useWebSocket() {
                 duration: 10000,
                 position: 'top-center',
               });
+              break;
+            case 'SPOT_FOUND':
+              onSpotFoundRef.current?.();
               break;
             default:
               console.log('Unhandled event:', data.event);

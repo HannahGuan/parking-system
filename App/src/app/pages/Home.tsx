@@ -1,73 +1,101 @@
-import imgMap from "../../assets/fab023585f95f8494892451e96b24e412f527d7c.png";
-import React, { useState, useEffect } from 'react';
+import 'leaflet/dist/leaflet.css';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { Navigation, Car } from 'lucide-react';
+import { MapContainer, TileLayer, CircleMarker, useMap } from 'react-leaflet';
+import { useWebSocket } from '../hooks/useWebSocket';
+
+const DEFAULT_CENTER: [number, number] = [37.4275, -122.1697];
+const DEFAULT_ZOOM = 17;
+
+function MapController({ coords }: { coords: { lat: number; lng: number } | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (coords) {
+      map.flyTo([coords.lat, coords.lng], DEFAULT_ZOOM, { duration: 1 });
+    }
+  }, [coords, map]);
+  return null;
+}
 
 export default function Home() {
   const navigate = useNavigate();
+  const { sendMessage } = useWebSocket(() => setShowSpotFound(true));
   const [showSpotFound, setShowSpotFound] = useState(false);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [geoError, setGeoError] = useState<string | null>(null);
+  const lastSentAt = useRef<number>(0);
+  const initialCoords = useRef<{ lat: number; lng: number } | null>(null);
+
+  // Haversine distance in feet between two lat/lng points
+  function distanceFeet(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+    const R = 20902231; // Earth radius in feet
+    const dLat = (b.lat - a.lat) * Math.PI / 180;
+    const dLng = (b.lng - a.lng) * Math.PI / 180;
+    const sin2 = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * Math.PI / 180) * Math.cos(b.lat * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(sin2));
+  }
 
   useEffect(() => {
-    if (!navigator.geolocation) {
-      setGeoError('GPS unavailable');
-      return;
-    }
+    if (!navigator.geolocation) return;
     const watchId = navigator.geolocation.watchPosition(
-      (pos) => setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      () => setGeoError('Location denied'),
+      (pos) => {
+        const next = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        if (!initialCoords.current) {
+          initialCoords.current = next;
+        }
+        setCoords(next);
+      },
+      () => {},
       { enableHighAccuracy: true }
     );
     return () => navigator.geolocation.clearWatch(watchId);
   }, []);
 
-  // Simulate arrival detection
+  // Stream coords to WoZ via WebSocket, throttled to once every 2s
   useEffect(() => {
-    const timer = setTimeout(() => {
+    if (!coords) return;
+    const now = Date.now();
+    if (now - lastSentAt.current < 2000) return;
+    lastSentAt.current = now;
+    sendMessage({ event: 'GPS_COORDS', lat: coords.lat, lng: coords.lng });
+  }, [coords, sendMessage]);
+
+  // Show spot found after user has moved 10 feet from starting position
+  useEffect(() => {
+    if (showSpotFound || !coords || !initialCoords.current) return;
+    if (distanceFeet(initialCoords.current, coords) >= 10) {
       setShowSpotFound(true);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, []);
+    }
+  }, [coords, showSpotFound]);
 
   const handleParkClick = () => {
     navigate('/confirm');
   };
 
   return (
-    <div className="relative h-full w-full bg-gray-200 overflow-hidden">
-      {/* Map Background */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center z-0"
-        style={{ backgroundImage: `url(${imgMap})` }}
+    <div className="relative h-full w-full overflow-hidden">
+      {/* Real Map */}
+      <MapContainer
+        center={DEFAULT_CENTER}
+        zoom={DEFAULT_ZOOM}
+        style={{ height: '100%', width: '100%' }}
+        zoomControl={false}
+        attributionControl={false}
       >
-        {/* User Location Marker - Google Maps Navigation Style */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform translate-y-12">
-            {/* Direction Beam */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full w-0 h-0 border-l-[30px] border-r-[30px] border-t-[80px] border-l-transparent border-r-transparent border-t-emerald-500/20 blur-sm transform -rotate-12 origin-bottom scale-y-150" />
-            
-            {/* Dot */}
-            <div className="w-6 h-6 bg-emerald-500 rounded-full border-[3px] border-white shadow-lg relative z-10 box-border ring-1 ring-black/5" />
-            
-            {/* Pulse */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-emerald-500/20 rounded-full animate-ping" />
-        </div>
-      </div>
+        <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />
+        <MapController coords={coords} />
+        {coords && (
+          <CircleMarker
+            center={[coords.lat, coords.lng]}
+            radius={10}
+            pathOptions={{ color: 'white', fillColor: '#10b981', fillOpacity: 1, weight: 3 }}
+          />
+        )}
+      </MapContainer>
 
-      {/* GPS Coordinates Box */}
-      <div className="absolute top-28 right-6 z-10">
-        <div className="bg-white px-3 py-2 rounded-xl shadow-lg ring-1 ring-black/5 text-xs font-mono text-gray-700">
-          {coords ? (
-            <div>({coords.lat.toFixed(6)}, {coords.lng.toFixed(6)})</div>
-          ) : (
-            <div className="text-gray-400">{geoError ?? 'Getting location…'}</div>
-          )}
-        </div>
-      </div>
-
-      {/* Floating UI Elements */}
-      <div className="absolute top-14 left-6 z-10 pointer-events-none">
+{/* Floating UI Elements */}
+      <div className="absolute top-14 left-6 z-[1000] pointer-events-none">
         <div className="bg-white px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2.5 pointer-events-auto ring-1 ring-black/5">
           <Navigation size={16} className="text-emerald-600 fill-emerald-600 -rotate-45 translate-x-0.5" />
           <span className="font-bold text-gray-900 text-[15px]">Navigating...</span>
@@ -77,16 +105,16 @@ export default function Home() {
       {/* Spot Found Notification */}
       <AnimatePresence>
         {showSpotFound && (
-          <motion.div 
+          <motion.div
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[2rem] shadow-[0_-5px_30px_rgba(0,0,0,0.15)] z-20 p-6 pb-10"
+            className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[2rem] shadow-[0_-5px_30px_rgba(0,0,0,0.15)] z-[1000] p-6 pb-10"
           >
             {/* Handle Bar */}
             <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6" />
-            
+
             <div className="flex items-center gap-5 mb-8">
               <div className="w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 shrink-0">
                 <Car size={28} />
@@ -98,13 +126,13 @@ export default function Home() {
             </div>
 
             <div className="space-y-3">
-              <button 
+              <button
                 onClick={handleParkClick}
                 className="w-full bg-emerald-500 text-white py-4 rounded-2xl font-bold text-[17px] hover:bg-emerald-600 active:scale-[0.98] transition-all shadow-lg shadow-emerald-500/20"
               >
                 Yes, Park Here
               </button>
-              <button 
+              <button
                 onClick={() => setShowSpotFound(false)}
                 className="w-full bg-gray-100 text-gray-600 py-4 rounded-2xl font-bold text-[17px] hover:bg-gray-200 active:scale-[0.98] transition-all"
               >

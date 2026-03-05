@@ -1,8 +1,8 @@
-import { Play, Wifi, WifiOff, LogOut, LogIn, Clock } from 'lucide-react';
+import { Play, Wifi, WifiOff, LogOut, LogIn, Clock, MapPin } from 'lucide-react';
 import { useWebSocket } from './useWebSocket';
 
 function App() {
-  const { sendMessage, isConnected } = useWebSocket();
+  const { sendMessage, isConnected, appCoords } = useWebSocket();
 
   const handleStartSimulation = () => {
     // Send START_SESSION event to backend (same as Infotainment does)
@@ -19,6 +19,10 @@ function App() {
 
   const handlePaymentReminder = () => {
     sendMessage({ event: 'PAYMENT_REMINDER' });
+  };
+
+  const handleSpotFound = () => {
+    sendMessage({ event: 'SPOT_FOUND' });
   };
 
   return (
@@ -55,6 +59,11 @@ function App() {
             <p className="text-purple-300 text-lg">
               Parking Simulation Controller
             </p>
+            <p className="text-purple-400 font-mono text-sm mt-2">
+              {appCoords
+                ? `App GPS: (${appCoords.lat.toFixed(6)}, ${appCoords.lng.toFixed(6)})`
+                : 'App GPS: waiting for location…'}
+            </p>
           </div>
 
           {/* Control Card */}
@@ -71,6 +80,24 @@ function App() {
                   (Infotainment and App).
                 </p>
               </div>
+
+              {/* Spot Found Button */}
+              <button
+                onClick={handleSpotFound}
+                disabled={!isConnected}
+                className={`
+                  w-full py-6 rounded-xl font-bold text-lg
+                  flex items-center justify-center gap-3
+                  transition-all duration-200 transform
+                  ${isConnected
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95'
+                    : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  }
+                `}
+              >
+                <MapPin className="w-6 h-6" />
+                Spot Found
+              </button>
 
               {/* Action Buttons */}
               <button

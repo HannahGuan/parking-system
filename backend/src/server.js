@@ -122,6 +122,24 @@ wss.on('connection', (ws, req) => {
           });
           break;
 
+        case 'SPOT_FOUND':
+          // WizardOfOz triggers this -> App shows spot found notification
+          console.log('Broadcasting SPOT_FOUND to App clients');
+          broadcast(clients.app, {
+            event: 'SPOT_FOUND',
+            timestamp: Date.now()
+          });
+          break;
+
+        case 'GPS_COORDS':
+          // App sends GPS coords -> forward to wizard-of-oz
+          broadcast(clients['wizard-of-oz'], {
+            event: 'GPS_COORDS',
+            lat: data.lat,
+            lng: data.lng
+          });
+          break;
+
         default:
           console.log('Unknown event:', data.event);
       }

@@ -15,6 +15,7 @@ export function useWebSocket() {
   const ws = useRef<WebSocket | null>(null);
   const reconnectTimeout = useRef<NodeJS.Timeout>();
   const [isConnected, setIsConnected] = useState(false);
+  const [appCoords, setAppCoords] = useState<{ lat: number; lng: number } | null>(null);
 
   const connect = useCallback(() => {
     try {
@@ -34,6 +35,9 @@ export function useWebSocket() {
         try {
           const data = JSON.parse(event.data);
           console.log('Received message:', data);
+          if (data.event === 'GPS_COORDS') {
+            setAppCoords({ lat: data.lat, lng: data.lng });
+          }
         } catch (error) {
           console.error('Error parsing WebSocket message:', error);
         }
@@ -76,5 +80,5 @@ export function useWebSocket() {
     }
   }, []);
 
-  return { sendMessage, isConnected };
+  return { sendMessage, isConnected, appCoords };
 }
