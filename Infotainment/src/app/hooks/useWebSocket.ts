@@ -37,6 +37,9 @@ export function useWebSocket() {
 
           // Handle navigation events from backend
           switch (data.event) {
+            case 'SPOT_FOUND':
+              navigate('/spot-found');
+              break;
             case 'NAVIGATE_TO_SESSION_STARTED':
               navigate('/session-started');
               break;

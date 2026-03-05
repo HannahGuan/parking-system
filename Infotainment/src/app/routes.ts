@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router";
 import { Layout } from "./components/Layout";
 import { MainPage } from "./components/MainPage";
+import { SpotFoundNotification } from "./components/SpotFoundNotification";
 import { ParkingConfirmation } from "./components/ParkingConfirmation";
 import { SessionStarted } from "./components/SessionStarted";
 import { SessionActive } from "./components/SessionActive";
@@ -16,6 +17,10 @@ export const router = createBrowserRouter([
       {
         index: true,
         Component: MainPage,
+      },
+      {
+        path: "spot-found",
+        Component: SpotFoundNotification,
       },
       {
         path: "parking-confirmation",

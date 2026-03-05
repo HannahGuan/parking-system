@@ -1,17 +1,41 @@
+import 'leaflet/dist/leaflet.css';
 import { Info, MapPin, DollarSign, CreditCard } from "lucide-react";
 import { Button } from "./ui/button";
 import { useNavigate } from "react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { MapContainer, TileLayer, CircleMarker, Circle, useMap } from 'react-leaflet';
 import { useWebSocket } from "../hooks/useWebSocket";
+import { DurationSelector } from "./DurationSelector";
+
+const DEFAULT_CENTER: [number, number] = [37.4275, -122.1697];
+const DEFAULT_ZOOM = 17;
+const LITTLEFIELD = { lat: 37.430169, lng: -122.167604 };
+
+function MapController({ coords }: { coords: { lat: number; lng: number } | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (coords) {
+      map.flyTo([coords.lat, coords.lng], DEFAULT_ZOOM, { duration: 1 });
+    }
+  }, [coords, map]);
+  return null;
+}
 
 export function ParkingConfirmation() {
   const navigate = useNavigate();
   const { sendMessage } = useWebSocket();
+  const [coords] = useState<{ lat: number; lng: number }>(LITTLEFIELD);
+  const [duration, setDuration] = useState(60);
+  const RATE_PER_HOUR = 2.50;
 
   const handleConfirm = () => {
-    // Send START_SESSION event to backend
-    sendMessage({ event: 'START_SESSION' });
+    // Send START_SESSION event to backend with duration
+    sendMessage({ event: 'START_SESSION', duration });
     // Navigation will happen via WebSocket response
+  };
+
+  const calculateCost = () => {
+    return ((duration / 60) * RATE_PER_HOUR).toFixed(2);
   };
 
   useEffect(() => {
@@ -24,66 +48,110 @@ export function ParkingConfirmation() {
 
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [navigate]);
+  }, [duration]);
 
   return (
-    <div className="relative h-screen w-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-800 overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.3),transparent_50%)]" />
+    <div className="relative h-screen w-screen bg-gray-900 overflow-hidden">
+      {/* Map Background */}
+      <div className="absolute inset-0">
+        <MapContainer
+          center={DEFAULT_CENTER}
+          zoom={DEFAULT_ZOOM}
+          style={{ height: '100%', width: '100%' }}
+          zoomControl={false}
+          attributionControl={false}
+        >
+          <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />
+          <MapController coords={coords} />
+          <Circle
+            center={[coords.lat, coords.lng]}
+            radius={25 * 0.3048}
+            pathOptions={{ color: '#10b981', fillColor: '#10b981', fillOpacity: 0.2, weight: 2 }}
+          />
+          {coords && (
+            <CircleMarker
+              center={[coords.lat, coords.lng]}
+              radius={12}
+              pathOptions={{ color: 'white', fillColor: '#10b981', fillOpacity: 1, weight: 3 }}
+            />
+          )}
+        </MapContainer>
       </div>
+
+      {/* Overlay Gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-gray-900/90 pointer-events-none" />
 
       {/* Modal Dialog */}
       <div className="absolute inset-0 flex items-center justify-center p-8">
-        <div className="w-full max-w-lg bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl shadow-2xl overflow-hidden">
+        <div className="w-full max-w-3xl bg-white rounded-2xl shadow-2xl overflow-hidden">
           {/* Header */}
-          <div className="bg-blue-600 px-6 py-4 flex items-center gap-3">
-            <Info className="w-6 h-6 text-white" />
-            <h2 className="text-white font-semibold text-lg uppercase tracking-wide">
-              Confirmation
+          <div className="bg-blue-600 px-8 py-5 flex items-center gap-3">
+            <Info className="w-7 h-7 text-white" />
+            <h2 className="text-white font-bold text-xl uppercase tracking-wide">
+              Confirm Parking Details
             </h2>
           </div>
 
           {/* Content */}
           <div className="p-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2 text-center uppercase tracking-wide">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2 text-center">
               Start Parking Session?
             </h1>
             <p className="text-gray-600 text-center mb-8">
-              Vehicle in Park Mode - Ready to begin
+              Review details and select duration
             </p>
 
             {/* Details */}
-            <div className="space-y-4 mb-8">
-              <div className="bg-white rounded-lg p-4 flex items-center gap-4 shadow-sm">
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              <div className="bg-gray-50 rounded-lg p-4 flex items-center gap-4 shadow-sm">
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                   <MapPin className="w-6 h-6 text-blue-600" />
                 </div>
                 <div className="flex-1">
                   <p className="text-sm text-gray-600">Location</p>
-                  <p className="font-semibold text-gray-900">Main Street, Zone A</p>
+                  <p className="font-semibold text-gray-900">Littlefield Courtyard</p>
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg p-4 flex items-center gap-4 shadow-sm">
+              <div className="bg-gray-50 rounded-lg p-4 flex items-center gap-4 shadow-sm">
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                   <DollarSign className="w-6 h-6 text-green-600" />
                 </div>
                 <div className="flex-1">
                   <p className="text-sm text-gray-600">Rate</p>
-                  <p className="font-semibold text-gray-900">$1.5/hour</p>
+                  <p className="font-semibold text-gray-900">${RATE_PER_HOUR}/hour</p>
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg p-4 flex items-center gap-4 shadow-sm">
+              <div className="bg-gray-50 rounded-lg p-4 flex items-center gap-4 shadow-sm col-span-2">
                 <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
                   <CreditCard className="w-6 h-6 text-orange-600" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm text-gray-600">Payment</p>
+                  <p className="text-sm text-gray-600">Payment Method</p>
                   <p className="font-semibold text-gray-900">•••• 4242</p>
                 </div>
               </div>
+            </div>
+
+            {/* Duration Selector */}
+            <div className="mb-8">
+              <DurationSelector
+                onDurationChange={setDuration}
+                selectedDuration={duration}
+                ratePerHour={RATE_PER_HOUR}
+              />
+            </div>
+
+            {/* Total Cost Display */}
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-6">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-700 font-semibold">Total Prepaid Amount:</span>
+                <span className="text-2xl font-bold text-blue-600">${calculateCost()}</span>
+              </div>
+              <p className="text-sm text-gray-600 mt-1">
+                For {duration} minute{duration !== 1 ? 's' : ''} of parking
+              </p>
             </div>
 
             {/* Action Buttons */}
@@ -91,17 +159,21 @@ export function ParkingConfirmation() {
               <Button
                 onClick={() => navigate('/')}
                 variant="outline"
-                className="bg-white border-2 border-gray-400 hover:bg-gray-100 text-gray-800 font-semibold py-6 rounded-lg"
+                className="bg-white border-2 border-gray-400 hover:bg-gray-100 text-gray-800 font-semibold py-7 rounded-xl text-base"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleConfirm}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-6 rounded-lg"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-7 rounded-xl text-base shadow-lg"
               >
-                Confirm
+                Confirm & Pay ${calculateCost()}
               </Button>
             </div>
+
+            <p className="text-center text-gray-400 text-xs mt-4">
+              Press SPACE to confirm
+            </p>
           </div>
         </div>
       </div>

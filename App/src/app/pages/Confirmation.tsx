@@ -1,15 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { motion } from 'motion/react';
-import { Info, MapPin, DollarSign, Clock } from 'lucide-react';
+import { Info, MapPin, DollarSign } from 'lucide-react';
+import { DurationSelector } from '../components/DurationSelector';
 
 export default function Confirmation() {
   const navigate = useNavigate();
+  const [duration, setDuration] = useState(60);
+  const RATE_PER_HOUR = 2.50;
 
-  // Calculate end time (2 hours from now)
-  const endTime = new Date();
-  endTime.setHours(endTime.getHours() + 2);
-  const endTimeStr = endTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+  const calculateCost = () => {
+    return ((duration / 60) * RATE_PER_HOUR).toFixed(2);
+  };
 
   return (
     <div className="h-full flex flex-col relative overflow-hidden bg-[#f0f4f2]">
@@ -61,16 +63,26 @@ export default function Confirmation() {
               </div>
             </div>
 
-            {/* Maximum Duration */}
-            <div className="bg-emerald-50/60 rounded-2xl px-4 py-3.5 flex items-center gap-4">
-              <div className="w-11 h-11 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0">
-                <Clock size={18} className="text-emerald-500" />
-              </div>
-              <div>
-                <p className="text-[11px] text-gray-400 font-medium">Maximum Duration</p>
-                <p className="text-[15px] font-bold text-gray-900">2 hours (until {endTimeStr})</p>
-              </div>
+          </div>
+
+          {/* Duration Selector */}
+          <div className="mb-5">
+            <DurationSelector
+              onDurationChange={setDuration}
+              selectedDuration={duration}
+              ratePerHour={RATE_PER_HOUR}
+            />
+          </div>
+
+          {/* Total Cost Display */}
+          <div className="bg-emerald-50/80 border-2 border-emerald-200 rounded-2xl px-4 py-3.5 mb-5">
+            <div className="flex justify-between items-center">
+              <span className="text-gray-700 font-bold text-[14px]">Total Prepaid:</span>
+              <span className="text-[22px] font-extrabold text-emerald-600">${calculateCost()}</span>
             </div>
+            <p className="text-xs text-gray-500 mt-1">
+              {duration} min of parking
+            </p>
           </div>
 
           {/* Payment Method */}
@@ -96,7 +108,7 @@ export default function Confirmation() {
           onClick={() => navigate('/active')}
           className="flex-[1.3] bg-emerald-500 text-white py-3.5 rounded-2xl font-bold text-[15px] hover:bg-emerald-600 active:scale-[0.97] transition-all shadow-lg shadow-emerald-500/20"
         >
-          Start Session
+          Pay ${calculateCost()}
         </button>
       </footer>
     </div>
