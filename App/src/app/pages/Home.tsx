@@ -7,6 +7,21 @@ import { Navigation, Car } from 'lucide-react';
 export default function Home() {
   const navigate = useNavigate();
   const [showSpotFound, setShowSpotFound] = useState(false);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [geoError, setGeoError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setGeoError('GPS unavailable');
+      return;
+    }
+    const watchId = navigator.geolocation.watchPosition(
+      (pos) => setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => setGeoError('Location denied'),
+      { enableHighAccuracy: true }
+    );
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, []);
 
   // Simulate arrival detection
   useEffect(() => {
@@ -37,6 +52,20 @@ export default function Home() {
             
             {/* Pulse */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-emerald-500/20 rounded-full animate-ping" />
+        </div>
+      </div>
+
+      {/* GPS Coordinates Box */}
+      <div className="absolute top-14 right-6 z-10">
+        <div className="bg-white px-3 py-2 rounded-xl shadow-lg ring-1 ring-black/5 text-xs font-mono text-gray-700">
+          {coords ? (
+            <>
+              <div>Lat: {coords.lat.toFixed(5)}</div>
+              <div>Lng: {coords.lng.toFixed(5)}</div>
+            </>
+          ) : (
+            <div className="text-gray-400">{geoError ?? 'Getting location…'}</div>
+          )}
         </div>
       </div>
 
