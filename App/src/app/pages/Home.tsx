@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { Navigation, Car } from 'lucide-react';
-import { MapContainer, TileLayer, CircleMarker, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Circle, useMap } from 'react-leaflet';
 import { useWebSocket } from '../hooks/useWebSocket';
 
 const DEFAULT_CENTER: [number, number] = [37.4275, -122.1697];
@@ -26,6 +26,7 @@ export default function Home() {
     (enabled, feet) => { setTriggerEnabled(enabled); setTriggerFeet(feet); }
   );
   const [showSpotFound, setShowSpotFound] = useState(false);
+  const [spotLabel, setSpotLabel] = useState('Zone #8492');
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [triggerEnabled, setTriggerEnabled] = useState(true);
   const [triggerFeet, setTriggerFeet] = useState(10);
@@ -78,6 +79,17 @@ export default function Home() {
     }
   }, [coords, showSpotFound, triggerEnabled, triggerFeet]);
 
+  const LITTLEFIELD = { lat: 37.430169, lng: -122.167604 };
+  const LITTLEFIELD_RADIUS_FEET = 25;
+  // Show spot found when within 25 feet of Littlefield courtyard
+  useEffect(() => {
+    if (showSpotFound || !coords) return;
+    if (distanceFeet(coords, LITTLEFIELD) <= LITTLEFIELD_RADIUS_FEET) {
+      setSpotLabel('Littlefield courtyard');
+      setShowSpotFound(true);
+    }
+  }, [coords, showSpotFound]);
+
   const handleParkClick = () => {
     navigate('/confirm');
   };
@@ -94,6 +106,11 @@ export default function Home() {
       >
         <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />
         <MapController coords={coords} />
+        <Circle
+          center={[LITTLEFIELD.lat, LITTLEFIELD.lng]}
+          radius={LITTLEFIELD_RADIUS_FEET * 0.3048}
+          pathOptions={{ color: '#10b981', fillColor: '#10b981', fillOpacity: 0.2, weight: 2 }}
+        />
         {coords && (
           <CircleMarker
             center={[coords.lat, coords.lng]}
@@ -130,7 +147,7 @@ export default function Home() {
               </div>
               <div>
                 <h2 className="text-[22px] font-bold text-gray-900 tracking-tight leading-tight">Spot Detected</h2>
-                <p className="text-gray-500 text-[15px] font-medium mt-0.5">Zone #8492 • $2.50/hr</p>
+                <p className="text-gray-500 text-[15px] font-medium mt-0.5">{spotLabel} • $2.50/hr</p>
               </div>
             </div>
 
@@ -142,7 +159,7 @@ export default function Home() {
                 Yes, Park Here
               </button>
               <button
-                onClick={() => { initialCoords.current = coords; setShowSpotFound(false); }}
+                onClick={() => { initialCoords.current = coords; setSpotLabel('Zone #8492'); setShowSpotFound(false); }}
                 className="w-full bg-gray-100 text-gray-600 py-4 rounded-2xl font-bold text-[17px] hover:bg-gray-200 active:scale-[0.98] transition-all"
               >
                 Not Parking
