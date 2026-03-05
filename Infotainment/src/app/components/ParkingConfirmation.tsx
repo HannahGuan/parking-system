@@ -120,70 +120,70 @@ export function ParkingConfirmation() {
       <div className="absolute inset-0 z-10 bg-gradient-to-b from-transparent via-transparent to-gray-900/90 pointer-events-none" />
 
       {/* Modal Dialog */}
-      <div className="absolute inset-0 z-20 flex items-center justify-center p-8">
-        <div className="w-full max-w-3xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+      <div className="absolute inset-0 z-20 flex items-center justify-center p-4">
+        <div className="w-full max-w-2xl bg-white rounded-xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
           {/* Header */}
-          <div className="bg-blue-600 px-8 py-5 flex items-center gap-3">
-            <Info className="w-7 h-7 text-white" />
-            <h2 className="text-white font-bold text-xl uppercase tracking-wide">
+          <div className="bg-blue-600 px-6 py-3 flex items-center gap-2">
+            <Info className="w-5 h-5 text-white" />
+            <h2 className="text-white font-bold text-base uppercase tracking-wide">
               Confirm Parking Details
             </h2>
           </div>
 
           {/* Content */}
-          <div className="p-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2 text-center">
+          <div className="p-5">
+            <h1 className="text-xl font-bold text-gray-900 mb-1 text-center">
               Start Parking Session?
             </h1>
-            <p className="text-gray-600 text-center mb-8">
+            <p className="text-gray-600 text-center mb-4 text-sm">
               Review details and select duration
             </p>
 
             {/* Details */}
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <div className="bg-gray-50 rounded-lg p-4 flex items-center gap-4 shadow-sm">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <MapPin className="w-6 h-6 text-blue-600" />
+            <div className="grid grid-cols-2 gap-3 mb-5">
+              <div className="bg-gray-50 rounded-lg p-3 flex items-center gap-3 shadow-sm">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <MapPin className="w-5 h-5 text-blue-600" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm text-gray-600">Location</p>
-                  <p className="font-semibold text-gray-900">Littlefield Courtyard</p>
+                  <p className="text-xs text-gray-600">Location</p>
+                  <p className="font-semibold text-gray-900 text-sm">Littlefield Courtyard</p>
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-lg p-4 flex items-center gap-4 shadow-sm">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <DollarSign className="w-6 h-6 text-green-600" />
+              <div className="bg-gray-50 rounded-lg p-3 flex items-center gap-3 shadow-sm">
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <DollarSign className="w-5 h-5 text-green-600" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm text-gray-600">Rate</p>
-                  <p className="font-semibold text-gray-900">${RATE_PER_HOUR}/hour</p>
+                  <p className="text-xs text-gray-600">Rate</p>
+                  <p className="font-semibold text-gray-900 text-sm">${RATE_PER_HOUR}/hour</p>
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-lg p-4 flex items-center gap-4 shadow-sm">
-                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <CreditCard className="w-6 h-6 text-orange-600" />
+              <div className="bg-gray-50 rounded-lg p-3 flex items-center gap-3 shadow-sm">
+                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <CreditCard className="w-5 h-5 text-orange-600" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm text-gray-600">Payment Method</p>
-                  <p className="font-semibold text-gray-900">•••• 4242</p>
+                  <p className="text-xs text-gray-600">Payment Method</p>
+                  <p className="font-semibold text-gray-900 text-sm">•••• 4242</p>
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-lg p-4 flex items-center gap-4 shadow-sm">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Car className="w-6 h-6 text-blue-600" />
+              <div className="bg-gray-50 rounded-lg p-3 flex items-center gap-3 shadow-sm">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Car className="w-5 h-5 text-blue-600" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm text-gray-600">Registered Vehicle</p>
-                  <p className="font-semibold text-gray-900 font-mono tracking-wider">{plateNumber}</p>
+                  <p className="text-xs text-gray-600">Registered Vehicle</p>
+                  <p className="font-semibold text-gray-900 text-sm font-mono tracking-wider">{plateNumber}</p>
                 </div>
               </div>
             </div>
 
             {/* Duration Selector */}
-            <div className="mb-8">
+            <div className="mb-5">
               <DurationSelector
                 onDurationChange={setDuration}
                 selectedDuration={duration}
@@ -192,34 +192,34 @@ export function ParkingConfirmation() {
             </div>
 
             {/* Total Cost Display */}
-            <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-6">
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-3 mb-4">
               <div className="flex justify-between items-center">
-                <span className="text-gray-700 font-semibold">Total Prepaid Amount:</span>
-                <span className="text-2xl font-bold text-blue-600">${calculateCost()}</span>
+                <span className="text-gray-700 font-semibold text-sm">Total Prepaid Amount:</span>
+                <span className="text-xl font-bold text-blue-600">${calculateCost()}</span>
               </div>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-xs text-gray-600 mt-1">
                 For {duration} minute{duration !== 1 ? 's' : ''} of parking
               </p>
             </div>
 
             {/* Action Buttons */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               <Button
                 onClick={() => navigate('/')}
                 variant="outline"
-                className="bg-white border-2 border-gray-400 hover:bg-gray-100 text-gray-800 font-semibold py-7 rounded-xl text-base"
+                className="bg-white border-2 border-gray-400 hover:bg-gray-100 text-gray-800 font-semibold py-4 rounded-lg text-sm"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleConfirm}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-7 rounded-xl text-base shadow-lg"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 rounded-lg text-sm shadow-lg"
               >
                 Confirm & Pay ${calculateCost()}
               </Button>
             </div>
 
-            <p className="text-center text-gray-400 text-xs mt-4">
+            <p className="text-center text-gray-400 text-xs mt-3">
               Press SPACE to confirm
             </p>
           </div>
