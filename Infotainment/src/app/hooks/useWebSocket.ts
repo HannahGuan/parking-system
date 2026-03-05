@@ -49,6 +49,13 @@ export function useWebSocket() {
             case 'NAVIGATE_TO_SESSION_ACTIVE':
               navigate('/session-active');
               break;
+            case 'UPDATE_PLATE':
+              // Dispatch custom event for plate number update
+              window.dispatchEvent(new CustomEvent('updatePlate', {
+                detail: { plateNumber: data.plateNumber }
+              }));
+              console.log('Plate number updated:', data.plateNumber);
+              break;
             default:
               console.log('Unhandled event:', data.event);
           }

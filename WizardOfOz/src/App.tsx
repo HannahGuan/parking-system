@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Play, Wifi, WifiOff, LogOut, LogIn, Clock, MapPin } from 'lucide-react';
+import { Play, Wifi, WifiOff, LogOut, LogIn, Clock, MapPin, Car } from 'lucide-react';
 import { useWebSocket } from './useWebSocket';
 
 function App() {
   const { sendMessage, isConnected, appCoords } = useWebSocket();
   const [triggerEnabled, setTriggerEnabled] = useState(true);
   const [triggerFeet, setTriggerFeet] = useState(10);
+  const [plateNumber, setPlateNumber] = useState('ABC-1234');
 
   const sendTriggerConfig = (enabled: boolean, feet: number) => {
     sendMessage({ event: 'CONFIGURE_SPOT_TRIGGER', enabled, feet });
@@ -30,6 +31,10 @@ function App() {
 
   const handleSpotFound = () => {
     sendMessage({ event: 'SPOT_FOUND' });
+  };
+
+  const handleSetPlate = () => {
+    sendMessage({ event: 'SET_PLATE_NUMBER', plateNumber });
   };
 
   return (
@@ -118,6 +123,41 @@ function App() {
                     className="w-20 bg-white/10 border border-white/20 text-white rounded-lg px-3 py-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-purple-400"
                   />
                 </div>
+              </div>
+
+              {/* Plate Number Setting */}
+              <div className="bg-white/5 rounded-xl p-5 border border-white/10 space-y-4">
+                <h3 className="text-white font-semibold text-base flex items-center gap-2">
+                  <Car className="w-5 h-5" />
+                  Vehicle Plate Number
+                </h3>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="text"
+                    value={plateNumber}
+                    onChange={(e) => setPlateNumber(e.target.value.toUpperCase())}
+                    placeholder="ABC-1234"
+                    className="flex-1 bg-white/10 border border-white/20 text-white rounded-lg px-4 py-2.5 text-base font-mono uppercase focus:outline-none focus:ring-2 focus:ring-purple-400"
+                    maxLength={10}
+                  />
+                  <button
+                    onClick={handleSetPlate}
+                    disabled={!isConnected}
+                    className={`
+                      px-6 py-2.5 rounded-lg font-semibold text-sm
+                      transition-all duration-200
+                      ${isConnected
+                        ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-md'
+                        : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                      }
+                    `}
+                  >
+                    Set Plate
+                  </button>
+                </div>
+                <p className="text-purple-300 text-xs">
+                  Current plate: <span className="font-mono font-bold">{plateNumber}</span>
+                </p>
               </div>
 
               {/* Spot Found Button */}

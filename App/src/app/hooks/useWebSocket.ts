@@ -65,6 +65,13 @@ export function useWebSocket(onSpotFound?: () => void, onConfigureTrigger?: (ena
             case 'CONFIGURE_SPOT_TRIGGER':
               onConfigureTriggerRef.current?.(data.enabled, data.feet);
               break;
+            case 'UPDATE_PLATE':
+              // Dispatch custom event for plate number update
+              window.dispatchEvent(new CustomEvent('updatePlate', {
+                detail: { plateNumber: data.plateNumber }
+              }));
+              console.log('Plate number updated:', data.plateNumber);
+              break;
             default:
               console.log('Unhandled event:', data.event);
           }

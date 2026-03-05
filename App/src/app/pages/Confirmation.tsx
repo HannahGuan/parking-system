@@ -1,17 +1,28 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { motion } from 'motion/react';
-import { Info, MapPin, DollarSign } from 'lucide-react';
+import { Info, MapPin, DollarSign, Car } from 'lucide-react';
 import { DurationSelector } from '../components/DurationSelector';
 
 export default function Confirmation() {
   const navigate = useNavigate();
   const [duration, setDuration] = useState(60);
+  const [plateNumber, setPlateNumber] = useState('ABC-1234');
   const RATE_PER_HOUR = 2.50;
 
   const calculateCost = () => {
     return ((duration / 60) * RATE_PER_HOUR).toFixed(2);
   };
+
+  // Listen for plate number updates from WebSocket
+  React.useEffect(() => {
+    const handlePlateUpdate = ((event: CustomEvent) => {
+      setPlateNumber(event.detail.plateNumber);
+    }) as EventListener;
+
+    window.addEventListener('updatePlate', handlePlateUpdate);
+    return () => window.removeEventListener('updatePlate', handlePlateUpdate);
+  }, []);
 
   return (
     <div className="h-full flex flex-col relative overflow-hidden bg-[#f0f4f2]">
@@ -83,6 +94,17 @@ export default function Confirmation() {
             <p className="text-xs text-gray-500 mt-1">
               {duration} min of parking
             </p>
+          </div>
+
+          {/* Vehicle Information */}
+          <div className="bg-emerald-50/60 rounded-2xl px-4 py-3.5 flex items-center gap-4">
+            <div className="w-11 h-11 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0">
+              <Car size={18} className="text-emerald-500" />
+            </div>
+            <div>
+              <p className="text-[11px] text-gray-400 font-medium">Registered Vehicle</p>
+              <p className="text-[15px] font-bold text-gray-900 font-mono tracking-wider">{plateNumber}</p>
+            </div>
           </div>
 
           {/* Payment Method */}

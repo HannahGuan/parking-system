@@ -152,6 +152,19 @@ wss.on('connection', (ws, req) => {
           });
           break;
 
+        case 'SET_PLATE_NUMBER':
+          // WizardOfOz sets plate number -> broadcast to App and Infotainment
+          console.log('Broadcasting plate number update:', data.plateNumber);
+          broadcast(clients.app, {
+            event: 'UPDATE_PLATE',
+            plateNumber: data.plateNumber
+          });
+          broadcast(clients.infotainment, {
+            event: 'UPDATE_PLATE',
+            plateNumber: data.plateNumber
+          });
+          break;
+
         default:
           console.log('Unknown event:', data.event);
       }

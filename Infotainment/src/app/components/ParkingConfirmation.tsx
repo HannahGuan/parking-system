@@ -1,5 +1,5 @@
 import 'leaflet/dist/leaflet.css';
-import { Info, MapPin, DollarSign, CreditCard } from "lucide-react";
+import { Info, MapPin, DollarSign, CreditCard, Car } from "lucide-react";
 import { Button } from "./ui/button";
 import { useNavigate } from "react-router";
 import { useEffect, useState, useRef } from "react";
@@ -35,6 +35,7 @@ export function ParkingConfirmation() {
   const { sendMessage } = useWebSocket();
   const [coords, setCoords] = useState<{ lat: number; lng: number }>(LITTLEFIELD);
   const [duration, setDuration] = useState(60);
+  const [plateNumber, setPlateNumber] = useState('ABC-1234');
   const RATE_PER_HOUR = 2.50;
   const lastCoords = useRef<{ lat: number; lng: number } | null>(null);
 
@@ -53,6 +54,16 @@ export function ParkingConfirmation() {
       { enableHighAccuracy: true }
     );
     return () => navigator.geolocation.clearWatch(watchId);
+  }, []);
+
+  // Listen for plate number updates from WebSocket
+  useEffect(() => {
+    const handlePlateUpdate = ((event: CustomEvent) => {
+      setPlateNumber(event.detail.plateNumber);
+    }) as EventListener;
+
+    window.addEventListener('updatePlate', handlePlateUpdate);
+    return () => window.removeEventListener('updatePlate', handlePlateUpdate);
   }, []);
 
   const handleConfirm = () => {
@@ -78,9 +89,9 @@ export function ParkingConfirmation() {
   }, [duration]);
 
   return (
-    <div className="relative h-screen w-screen bg-gray-900 overflow-hidden">
+    <div className="fixed inset-0 z-[9999] h-screen w-screen bg-gray-900 overflow-hidden">
       {/* Map Background */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 z-0">
         <MapContainer
           center={DEFAULT_CENTER}
           zoom={DEFAULT_ZOOM}
@@ -106,10 +117,10 @@ export function ParkingConfirmation() {
       </div>
 
       {/* Overlay Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-gray-900/90 pointer-events-none" />
+      <div className="absolute inset-0 z-10 bg-gradient-to-b from-transparent via-transparent to-gray-900/90 pointer-events-none" />
 
       {/* Modal Dialog */}
-      <div className="absolute inset-0 flex items-center justify-center p-8">
+      <div className="absolute inset-0 z-20 flex items-center justify-center p-8">
         <div className="w-full max-w-3xl bg-white rounded-2xl shadow-2xl overflow-hidden">
           {/* Header */}
           <div className="bg-blue-600 px-8 py-5 flex items-center gap-3">
@@ -150,13 +161,23 @@ export function ParkingConfirmation() {
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-lg p-4 flex items-center gap-4 shadow-sm col-span-2">
+              <div className="bg-gray-50 rounded-lg p-4 flex items-center gap-4 shadow-sm">
                 <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
                   <CreditCard className="w-6 h-6 text-orange-600" />
                 </div>
                 <div className="flex-1">
                   <p className="text-sm text-gray-600">Payment Method</p>
                   <p className="font-semibold text-gray-900">•••• 4242</p>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4 flex items-center gap-4 shadow-sm">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Car className="w-6 h-6 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-gray-600">Registered Vehicle</p>
+                  <p className="font-semibold text-gray-900 font-mono tracking-wider">{plateNumber}</p>
                 </div>
               </div>
             </div>
