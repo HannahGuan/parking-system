@@ -56,13 +56,10 @@ export default function Home() {
       </div>
 
       {/* GPS Coordinates Box */}
-      <div className="absolute top-14 right-6 z-10">
+      <div className="absolute top-28 right-6 z-10">
         <div className="bg-white px-3 py-2 rounded-xl shadow-lg ring-1 ring-black/5 text-xs font-mono text-gray-700">
           {coords ? (
-            <>
-              <div>Lat: {coords.lat.toFixed(5)}</div>
-              <div>Lng: {coords.lng.toFixed(5)}</div>
-            </>
+            <div>({coords.lat.toFixed(6)}, {coords.lng.toFixed(6)})</div>
           ) : (
             <div className="text-gray-400">{geoError ?? 'Getting location…'}</div>
           )}
