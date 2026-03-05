@@ -13,12 +13,14 @@ interface WebSocketMessage {
   [key: string]: any;
 }
 
-export function useWebSocket(onSpotFound?: () => void) {
+export function useWebSocket(onSpotFound?: () => void, onConfigureTrigger?: (enabled: boolean, feet: number) => void) {
   const ws = useRef<WebSocket | null>(null);
   const navigate = useNavigate();
   const reconnectTimeout = useRef<NodeJS.Timeout>();
   const onSpotFoundRef = useRef(onSpotFound);
+  const onConfigureTriggerRef = useRef(onConfigureTrigger);
   useEffect(() => { onSpotFoundRef.current = onSpotFound; }, [onSpotFound]);
+  useEffect(() => { onConfigureTriggerRef.current = onConfigureTrigger; }, [onConfigureTrigger]);
 
   const connect = useCallback(() => {
     try {
@@ -59,6 +61,9 @@ export function useWebSocket(onSpotFound?: () => void) {
               break;
             case 'SPOT_FOUND':
               onSpotFoundRef.current?.();
+              break;
+            case 'CONFIGURE_SPOT_TRIGGER':
+              onConfigureTriggerRef.current?.(data.enabled, data.feet);
               break;
             default:
               console.log('Unhandled event:', data.event);

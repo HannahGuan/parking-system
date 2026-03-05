@@ -1,8 +1,15 @@
+import { useState } from 'react';
 import { Play, Wifi, WifiOff, LogOut, LogIn, Clock, MapPin } from 'lucide-react';
 import { useWebSocket } from './useWebSocket';
 
 function App() {
   const { sendMessage, isConnected, appCoords } = useWebSocket();
+  const [triggerEnabled, setTriggerEnabled] = useState(true);
+  const [triggerFeet, setTriggerFeet] = useState(10);
+
+  const sendTriggerConfig = (enabled: boolean, feet: number) => {
+    sendMessage({ event: 'CONFIGURE_SPOT_TRIGGER', enabled, feet });
+  };
 
   const handleStartSimulation = () => {
     // Send START_SESSION event to backend (same as Infotainment does)
@@ -79,6 +86,38 @@ function App() {
                   This will send a START_SESSION event to all connected clients
                   (Infotainment and App).
                 </p>
+              </div>
+
+              {/* GPS Trigger Settings */}
+              <div className="bg-white/5 rounded-xl p-5 border border-white/10 space-y-4">
+                <h3 className="text-white font-semibold text-base">GPS Auto-Trigger</h3>
+                <div className="flex items-center justify-between">
+                  <span className="text-purple-200 text-sm">Distance trigger</span>
+                  <button
+                    onClick={() => {
+                      const next = !triggerEnabled;
+                      setTriggerEnabled(next);
+                      sendTriggerConfig(next, triggerFeet);
+                    }}
+                    className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors duration-200 ${triggerEnabled ? 'bg-emerald-500 text-white' : 'bg-gray-600 text-gray-300'}`}
+                  >
+                    {triggerEnabled ? 'ON' : 'OFF'}
+                  </button>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-purple-200 text-sm">Distance (feet)</span>
+                  <input
+                    type="number"
+                    min={1}
+                    value={triggerFeet}
+                    onChange={(e) => {
+                      const next = Math.max(1, Number(e.target.value));
+                      setTriggerFeet(next);
+                      sendTriggerConfig(triggerEnabled, next);
+                    }}
+                    className="w-20 bg-white/10 border border-white/20 text-white rounded-lg px-3 py-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-purple-400"
+                  />
+                </div>
               </div>
 
               {/* Spot Found Button */}

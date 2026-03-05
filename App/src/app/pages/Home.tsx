@@ -21,9 +21,14 @@ function MapController({ coords }: { coords: { lat: number; lng: number } | null
 
 export default function Home() {
   const navigate = useNavigate();
-  const { sendMessage } = useWebSocket(() => setShowSpotFound(true));
+  const { sendMessage } = useWebSocket(
+    () => setShowSpotFound(true),
+    (enabled, feet) => { setTriggerEnabled(enabled); setTriggerFeet(feet); }
+  );
   const [showSpotFound, setShowSpotFound] = useState(false);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [triggerEnabled, setTriggerEnabled] = useState(true);
+  const [triggerFeet, setTriggerFeet] = useState(10);
   const lastSentAt = useRef<number>(0);
   const initialCoords = useRef<{ lat: number; lng: number } | null>(null);
   const lastCoords = useRef<{ lat: number; lng: number } | null>(null);
@@ -65,13 +70,13 @@ export default function Home() {
     sendMessage({ event: 'GPS_COORDS', lat: coords.lat, lng: coords.lng });
   }, [coords, sendMessage]);
 
-  // Show spot found after user has moved 10 feet from starting position
+  // Show spot found after user has moved triggerFeet from starting position
   useEffect(() => {
-    if (showSpotFound || !coords || !initialCoords.current) return;
-    if (distanceFeet(initialCoords.current, coords) >= 10) {
+    if (!triggerEnabled || showSpotFound || !coords || !initialCoords.current) return;
+    if (distanceFeet(initialCoords.current, coords) >= triggerFeet) {
       setShowSpotFound(true);
     }
-  }, [coords, showSpotFound]);
+  }, [coords, showSpotFound, triggerEnabled, triggerFeet]);
 
   const handleParkClick = () => {
     navigate('/confirm');

@@ -122,6 +122,14 @@ wss.on('connection', (ws, req) => {
           });
           break;
 
+        case 'CONFIGURE_SPOT_TRIGGER':
+          broadcast(clients.app, {
+            event: 'CONFIGURE_SPOT_TRIGGER',
+            enabled: data.enabled,
+            feet: data.feet
+          });
+          break;
+
         case 'SPOT_FOUND':
           // WizardOfOz triggers this -> App shows spot found notification
           console.log('Broadcasting SPOT_FOUND to App clients');
