@@ -131,8 +131,12 @@ wss.on('connection', (ws, req) => {
           break;
 
         case 'SPOT_FOUND':
-          // WizardOfOz triggers this -> Infotainment shows spot found notification
-          console.log('Broadcasting SPOT_FOUND to Infotainment clients');
+          // WizardOfOz triggers this -> Both App and Infotainment show spot found notification
+          console.log('Broadcasting SPOT_FOUND to App and Infotainment clients');
+          broadcast(clients.app, {
+            event: 'SPOT_FOUND',
+            timestamp: Date.now()
+          });
           broadcast(clients.infotainment, {
             event: 'SPOT_FOUND',
             timestamp: Date.now()
