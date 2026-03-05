@@ -26,6 +26,7 @@ export default function Home() {
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const lastSentAt = useRef<number>(0);
   const initialCoords = useRef<{ lat: number; lng: number } | null>(null);
+  const lastCoords = useRef<{ lat: number; lng: number } | null>(null);
 
   // Haversine distance in feet between two lat/lng points
   function distanceFeet(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
@@ -40,10 +41,13 @@ export default function Home() {
     if (!navigator.geolocation) return;
     const watchId = navigator.geolocation.watchPosition(
       (pos) => {
+        if (pos.coords.accuracy > 50) return; // ignore low-accuracy fixes
         const next = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         if (!initialCoords.current) {
           initialCoords.current = next;
         }
+        if (lastCoords.current && distanceFeet(lastCoords.current, next) < 3) return; // ignore sub-noise jitter
+        lastCoords.current = next;
         setCoords(next);
       },
       () => {},
@@ -133,7 +137,7 @@ export default function Home() {
                 Yes, Park Here
               </button>
               <button
-                onClick={() => setShowSpotFound(false)}
+                onClick={() => { initialCoords.current = coords; setShowSpotFound(false); }}
                 className="w-full bg-gray-100 text-gray-600 py-4 rounded-2xl font-bold text-[17px] hover:bg-gray-200 active:scale-[0.98] transition-all"
               >
                 Not Parking
