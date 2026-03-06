@@ -23,12 +23,10 @@ export function PaymentMethods() {
 
   // Load payment methods from backend
   useEffect(() => {
-    // Request payment methods from backend
-    sendMessage({ event: 'GET_PAYMENT_METHODS' });
-
     // Listen for payment methods response
     const handlePaymentMethods = ((event: CustomEvent) => {
       if (event.detail?.paymentMethods) {
+        console.log('PaymentMethods received:', event.detail.paymentMethods);
         setPaymentMethods(event.detail.paymentMethods);
       }
       setIsLoading(false);
@@ -37,17 +35,24 @@ export function PaymentMethods() {
     // Also request when page becomes visible (sync with other client)
     const handleVisibilityChange = () => {
       if (!document.hidden) {
+        console.log('Page visible, requesting payment methods');
         sendMessage({ event: 'GET_PAYMENT_METHODS' });
       }
     };
 
     const handleFocus = () => {
+      console.log('Page focused, requesting payment methods');
       sendMessage({ event: 'GET_PAYMENT_METHODS' });
     };
 
+    // Add event listeners BEFORE requesting data
     window.addEventListener('paymentMethodsUpdated', handlePaymentMethods);
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleFocus);
+
+    // Now request payment methods from backend
+    console.log('Requesting payment methods on mount');
+    sendMessage({ event: 'GET_PAYMENT_METHODS' });
 
     // Simulate loading
     setTimeout(() => setIsLoading(false), 500);
@@ -57,7 +62,7 @@ export function PaymentMethods() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
     };
-  }, []);
+  }, [sendMessage]);
 
   const handleCardSave = (card: { last4: string; brand: string; expMonth: string; expYear: string }) => {
     const newCard: PaymentMethod = {

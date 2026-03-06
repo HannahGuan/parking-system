@@ -55,6 +55,10 @@ export function useWebSocket(onSpotFound?: () => void, onConfigureTrigger?: (ena
             case 'NAVIGATE_TO_PAYMENT':
               navigate('/payment');
               break;
+            case 'NAVIGATE_TO_HOME':
+              console.log('Session complete, navigating to home');
+              navigate('/');
+              break;
             case 'SHOW_PAYMENT_NOTIFICATION':
               // Show in-app notification prompting user to pay for parking
               toast.warning('Payment Reminder', {

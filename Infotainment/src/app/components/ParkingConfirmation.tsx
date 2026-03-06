@@ -68,27 +68,32 @@ export function ParkingConfirmation() {
 
   // Request payment methods on mount and when returning to this page
   useEffect(() => {
-    sendMessage({ event: 'GET_PAYMENT_METHODS' });
-
     // Also request when page becomes visible (user returns from payment-methods)
     const handleVisibilityChange = () => {
       if (!document.hidden) {
+        console.log('ParkingConfirmation visible, requesting payment methods');
         sendMessage({ event: 'GET_PAYMENT_METHODS' });
       }
     };
 
     const handleFocus = () => {
+      console.log('ParkingConfirmation focused, requesting payment methods');
       sendMessage({ event: 'GET_PAYMENT_METHODS' });
     };
 
+    // Add listeners first
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleFocus);
+
+    // Then request payment methods
+    console.log('ParkingConfirmation mounted, requesting payment methods');
+    sendMessage({ event: 'GET_PAYMENT_METHODS' });
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
     };
-  }, []);
+  }, [sendMessage]);
 
   // Listen for plate number updates from WebSocket
   useEffect(() => {

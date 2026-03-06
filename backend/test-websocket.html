@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSocket Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .client {
+      border: 2px solid #333;
+      padding: 15px;
+      border-radius: 8px;
+    }
+    .client h2 {
+      margin-top: 0;
+    }
+    button {
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px 0;
+    }
+    button:hover {
+      background: #059669;
+    }
+    .log {
+      background: #f3f4f6;
+      border: 1px solid #d1d5db;
+      padding: 10px;
+      margin-top: 10px;
+      height: 300px;
+      overflow-y: auto;
+      font-size: 12px;
+      font-family: monospace;
+    }
+    .log-entry {
+      margin: 2px 0;
+    }
+    .connected { color: green; }
+    .disconnected { color: red; }
+    .message { color: blue; }
+  </style>
+</head>
+<body>
+  <h1>WebSocket Connection Test</h1>
+
+  <div class="container">
+    <!-- App Client -->
+    <div class="client">
+      <h2>App Client</h2>
+      <div>
+        Status: <span id="app-status" class="disconnected">Disconnected</span>
+      </div>
+      <button onclick="connectApp()">Connect</button>
+      <button onclick="addCardApp()">Add Test Card</button>
+      <button onclick="getCardsApp()">Get Cards</button>
+      <div class="log" id="app-log"></div>
+    </div>
+
+    <!-- Infotainment Client -->
+    <div class="client">
+      <h2>Infotainment Client</h2>
+      <div>
+        Status: <span id="info-status" class="disconnected">Disconnected</span>
+      </div>
+      <button onclick="connectInfo()">Connect</button>
+      <button onclick="addCardInfo()">Add Test Card</button>
+      <button onclick="getCardsInfo()">Get Cards</button>
+      <div class="log" id="info-log"></div>
+    </div>
+  </div>
+
+  <script>
+    let appWs = null;
+    let infoWs = null;
+
+    function log(client, message, type = 'message') {
+      const logDiv = document.getElementById(`${client}-log`);
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logDiv.appendChild(entry);
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    function updateStatus(client, connected) {
+      const statusSpan = document.getElementById(`${client}-status`);
+      statusSpan.textContent = connected ? 'Connected' : 'Disconnected';
+      statusSpan.className = connected ? 'connected' : 'disconnected';
+    }
+
+    function connectApp() {
+      if (appWs && appWs.readyState === WebSocket.OPEN) {
+        log('app', 'Already connected');
+        return;
+      }
+
+      appWs = new WebSocket('ws://localhost:3001');
+
+      appWs.onopen = () => {
+        log('app', 'WebSocket connected', 'connected');
+        updateStatus('app', true);
+        appWs.send(JSON.stringify({ event: 'REGISTER', clientType: 'app' }));
+        log('app', 'Sent REGISTER event');
+      };
+
+      appWs.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        log('app', `Received: ${data.event} - ${JSON.stringify(data).substring(0, 100)}`, 'message');
+      };
+
+      appWs.onclose = () => {
+        log('app', 'WebSocket disconnected', 'disconnected');
+        updateStatus('app', false);
+      };
+
+      appWs.onerror = (error) => {
+        log('app', `Error: ${error}`, 'disconnected');
+      };
+    }
+
+    function connectInfo() {
+      if (infoWs && infoWs.readyState === WebSocket.OPEN) {
+        log('info', 'Already connected');
+        return;
+      }
+
+      infoWs = new WebSocket('ws://localhost:3001');
+
+      infoWs.onopen = () => {
+        log('info', 'WebSocket connected', 'connected');
+        updateStatus('info', true);
+        infoWs.send(JSON.stringify({ event: 'REGISTER', clientType: 'infotainment' }));
+        log('info', 'Sent REGISTER event');
+      };
+
+      infoWs.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        log('info', `Received: ${data.event} - ${JSON.stringify(data).substring(0, 100)}`, 'message');
+      };
+
+      infoWs.onclose = () => {
+        log('info', 'WebSocket disconnected', 'disconnected');
+        updateStatus('info', false);
+      };
+
+      infoWs.onerror = (error) => {
+        log('info', `Error: ${error}`, 'disconnected');
+      };
+    }
+
+    function addCardApp() {
+      if (!appWs || appWs.readyState !== WebSocket.OPEN) {
+        log('app', 'Not connected!', 'disconnected');
+        return;
+      }
+      const card = {
+        id: `pm_${Date.now()}`,
+        last4: '4242',
+        brand: 'Visa',
+        expMonth: '12',
+        expYear: '2025',
+        isDefault: true
+      };
+      appWs.send(JSON.stringify({ event: 'ADD_PAYMENT_METHOD', paymentMethod: card }));
+      log('app', `Sent ADD_PAYMENT_METHOD: ${JSON.stringify(card)}`);
+    }
+
+    function addCardInfo() {
+      if (!infoWs || infoWs.readyState !== WebSocket.OPEN) {
+        log('info', 'Not connected!', 'disconnected');
+        return;
+      }
+      const card = {
+        id: `pm_${Date.now()}`,
+        last4: '5555',
+        brand: 'Mastercard',
+        expMonth: '06',
+        expYear: '2026',
+        isDefault: true
+      };
+      infoWs.send(JSON.stringify({ event: 'ADD_PAYMENT_METHOD', paymentMethod: card }));
+      log('info', `Sent ADD_PAYMENT_METHOD: ${JSON.stringify(card)}`);
+    }
+
+    function getCardsApp() {
+      if (!appWs || appWs.readyState !== WebSocket.OPEN) {
+        log('app', 'Not connected!', 'disconnected');
+        return;
+      }
+      appWs.send(JSON.stringify({ event: 'GET_PAYMENT_METHODS' }));
+      log('app', 'Sent GET_PAYMENT_METHODS');
+    }
+
+    function getCardsInfo() {
+      if (!infoWs || infoWs.readyState !== WebSocket.OPEN) {
+        log('info', 'Not connected!', 'disconnected');
+        return;
+      }
+      infoWs.send(JSON.stringify({ event: 'GET_PAYMENT_METHODS' }));
+      log('info', 'Sent GET_PAYMENT_METHODS');
+    }
+
+    // Auto-connect on page load
+    window.onload = () => {
+      connectApp();
+      connectInfo();
+    };
+  </script>
+</body>
+</html>

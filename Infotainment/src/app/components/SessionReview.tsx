@@ -2,15 +2,17 @@ import { CheckCircle, Clock, MapPin, DollarSign } from "lucide-react";
 import { Button } from "./ui/button";
 import { useNavigate } from "react-router";
 import { useEffect } from "react";
+import { useWebSocket } from "../hooks/useWebSocket";
 
 export function SessionReview() {
   const navigate = useNavigate();
+  const { sendMessage } = useWebSocket();
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       if (event.code === "Space") {
         event.preventDefault();
-        navigate("/");
+        handleDone();
       }
     };
 
@@ -19,6 +21,8 @@ export function SessionReview() {
   }, [navigate]);
 
   const handleDone = () => {
+    // Notify App to also go back to home
+    sendMessage({ event: 'SESSION_COMPLETE' });
     navigate("/");
   };
 

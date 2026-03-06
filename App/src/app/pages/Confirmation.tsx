@@ -28,27 +28,32 @@ export default function Confirmation() {
 
   // Request payment methods on mount and when returning to this page
   React.useEffect(() => {
-    sendMessage({ event: 'GET_PAYMENT_METHODS' });
-
     // Also request when page becomes visible (user returns from payment-methods)
     const handleVisibilityChange = () => {
       if (!document.hidden) {
+        console.log('Confirmation visible, requesting payment methods');
         sendMessage({ event: 'GET_PAYMENT_METHODS' });
       }
     };
 
     const handleFocus = () => {
+      console.log('Confirmation focused, requesting payment methods');
       sendMessage({ event: 'GET_PAYMENT_METHODS' });
     };
 
+    // Add listeners first
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleFocus);
+
+    // Then request payment methods
+    console.log('Confirmation mounted, requesting payment methods');
+    sendMessage({ event: 'GET_PAYMENT_METHODS' });
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
     };
-  }, []);
+  }, [sendMessage]);
 
   // Listen for plate number updates from WebSocket
   React.useEffect(() => {

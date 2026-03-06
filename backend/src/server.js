@@ -100,6 +100,15 @@ wss.on('connection', (ws, req) => {
           });
           break;
 
+        case 'SESSION_COMPLETE':
+          // Session review complete -> Both App and Infotainment go to home
+          console.log('Broadcasting SESSION_COMPLETE - navigate to home');
+          broadcast(clients.app, {
+            event: 'NAVIGATE_TO_HOME',
+            timestamp: Date.now()
+          });
+          break;
+
         case 'USER_LEAVES_CAR':
           // WizardOfOz triggers this -> Infotainment goes black
           console.log('Broadcasting GO_BLACK to Infotainment clients');
