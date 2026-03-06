@@ -13,8 +13,26 @@ export default function ActiveSession() {
   const [totalSeconds, setTotalSeconds] = useState(INITIAL_MINUTES * 60);
   const [elapsed, setElapsed] = useState(0);
   const [extensions, setExtensions] = useState(0);
+  const [initialDuration, setInitialDuration] = useState(INITIAL_MINUTES);
   const [showSafeToLeave, setShowSafeToLeave] = useState(false);
   const [showExtendConfirm, setShowExtendConfirm] = useState(false);
+
+  // Listen for session duration from WebSocket
+  useEffect(() => {
+    const handleSessionActive = ((event: CustomEvent) => {
+      if (event.detail?.duration) {
+        const minutes = event.detail.duration;
+        setInitialDuration(minutes);
+        setTotalSeconds(minutes * 60);
+        setElapsed(0);
+        setExtensions(0);
+        console.log('Session started with duration:', minutes, 'minutes');
+      }
+    }) as EventListener;
+
+    window.addEventListener('sessionActive', handleSessionActive);
+    return () => window.removeEventListener('sessionActive', handleSessionActive);
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -44,7 +62,7 @@ export default function ActiveSession() {
     return `${mins.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  const totalParkedMinutes = INITIAL_MINUTES + extensions * EXTEND_MINUTES;
+  const totalParkedMinutes = initialDuration + extensions * EXTEND_MINUTES;
   const progressRatio = totalSeconds / (totalParkedMinutes * 60);
 
   const handleExtend = () => {

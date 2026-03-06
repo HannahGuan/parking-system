@@ -46,6 +46,10 @@ export function useWebSocket(onSpotFound?: () => void, onConfigureTrigger?: (ena
               navigate('/confirm');
               break;
             case 'NAVIGATE_TO_ACTIVE':
+              // Dispatch custom event with duration for ActiveSession page
+              window.dispatchEvent(new CustomEvent('sessionActive', {
+                detail: { duration: data.duration }
+              }));
               navigate('/active');
               break;
             case 'NAVIGATE_TO_PAYMENT':
@@ -71,6 +75,25 @@ export function useWebSocket(onSpotFound?: () => void, onConfigureTrigger?: (ena
                 detail: { plateNumber: data.plateNumber }
               }));
               console.log('Plate number updated:', data.plateNumber);
+              break;
+            case 'PAYMENT_METHODS_RESPONSE':
+              // Dispatch custom event for payment methods update
+              window.dispatchEvent(new CustomEvent('paymentMethodsUpdated', {
+                detail: { paymentMethods: data.paymentMethods }
+              }));
+              console.log('Payment methods updated:', data.paymentMethods);
+              break;
+            case 'PAYMENT_RESULT':
+              // Dispatch custom event for payment result
+              window.dispatchEvent(new CustomEvent('paymentResult', {
+                detail: {
+                  success: data.success,
+                  transactionId: data.transactionId,
+                  amount: data.amount,
+                  message: data.message
+                }
+              }));
+              console.log('Payment result:', data);
               break;
             default:
               console.log('Unhandled event:', data.event);

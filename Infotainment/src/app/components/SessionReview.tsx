@@ -10,7 +10,7 @@ export function SessionReview() {
     const handleKeyPress = (event: KeyboardEvent) => {
       if (event.code === "Space") {
         event.preventDefault();
-        navigate("/main");
+        navigate("/");
       }
     };
 
@@ -19,7 +19,7 @@ export function SessionReview() {
   }, [navigate]);
 
   const handleDone = () => {
-    navigate("/main");
+    navigate("/");
   };
 
   return (

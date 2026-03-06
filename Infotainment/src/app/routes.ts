@@ -8,6 +8,7 @@ import { SessionActive } from "./components/SessionActive";
 import { EndSession } from "./components/EndSession";
 import { SessionReview } from "./components/SessionReview";
 import { BlackScreen } from "./components/BlackScreen";
+import { PaymentMethods } from "./components/PaymentMethods";
 
 export const router = createBrowserRouter([
   {
@@ -45,6 +46,10 @@ export const router = createBrowserRouter([
       {
         path: "black-screen",
         Component: BlackScreen,
+      },
+      {
+        path: "payment-methods",
+        Component: PaymentMethods,
       },
     ],
   },

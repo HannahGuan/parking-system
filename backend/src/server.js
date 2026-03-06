@@ -23,6 +23,9 @@ const clients = {
   'wizard-of-oz': new Set()
 };
 
+// Store payment methods in memory (simple demo version)
+let paymentMethods = [];
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({
@@ -71,17 +74,19 @@ wss.on('connection', (ws, req) => {
 
         case 'START_SESSION':
           // Infotainment confirms parking -> Both apps navigate
-          console.log('Broadcasting START_SESSION');
+          console.log('Broadcasting START_SESSION with duration:', data.duration);
 
           // App goes to Active page
           broadcast(clients.app, {
             event: 'NAVIGATE_TO_ACTIVE',
+            duration: data.duration,
             timestamp: Date.now()
           });
 
           // Infotainment goes to Session Started
           broadcast(clients.infotainment, {
             event: 'NAVIGATE_TO_SESSION_STARTED',
+            duration: data.duration,
             timestamp: Date.now()
           });
           break;
@@ -163,6 +168,79 @@ wss.on('connection', (ws, req) => {
             event: 'UPDATE_PLATE',
             plateNumber: data.plateNumber
           });
+          break;
+
+        case 'GET_PAYMENT_METHODS':
+          // Client requests payment methods
+          console.log('Sending payment methods to client');
+          ws.send(JSON.stringify({
+            event: 'PAYMENT_METHODS_RESPONSE',
+            paymentMethods: paymentMethods
+          }));
+          break;
+
+        case 'ADD_PAYMENT_METHOD':
+          // Client adds a payment method
+          console.log('Adding payment method:', data.paymentMethod);
+          paymentMethods.push(data.paymentMethod);
+          // Broadcast to all clients
+          broadcast(clients.app, {
+            event: 'PAYMENT_METHODS_RESPONSE',
+            paymentMethods: paymentMethods
+          });
+          broadcast(clients.infotainment, {
+            event: 'PAYMENT_METHODS_RESPONSE',
+            paymentMethods: paymentMethods
+          });
+          break;
+
+        case 'REMOVE_PAYMENT_METHOD':
+          // Client removes a payment method
+          console.log('Removing payment method:', data.paymentMethodId);
+          paymentMethods = paymentMethods.filter(pm => pm.id !== data.paymentMethodId);
+          // Broadcast to all clients
+          broadcast(clients.app, {
+            event: 'PAYMENT_METHODS_RESPONSE',
+            paymentMethods: paymentMethods
+          });
+          broadcast(clients.infotainment, {
+            event: 'PAYMENT_METHODS_RESPONSE',
+            paymentMethods: paymentMethods
+          });
+          break;
+
+        case 'SET_DEFAULT_PAYMENT_METHOD':
+          // Client sets default payment method
+          console.log('Setting default payment method:', data.paymentMethodId);
+          paymentMethods = paymentMethods.map(pm => ({
+            ...pm,
+            isDefault: pm.id === data.paymentMethodId
+          }));
+          // Broadcast to all clients
+          broadcast(clients.app, {
+            event: 'PAYMENT_METHODS_RESPONSE',
+            paymentMethods: paymentMethods
+          });
+          broadcast(clients.infotainment, {
+            event: 'PAYMENT_METHODS_RESPONSE',
+            paymentMethods: paymentMethods
+          });
+          break;
+
+        case 'PROCESS_PAYMENT':
+          // Mock payment processing
+          console.log('Processing payment:', data);
+          const success = !data.paymentMethodId || data.paymentMethodId !== 'fail';
+
+          setTimeout(() => {
+            ws.send(JSON.stringify({
+              event: 'PAYMENT_RESULT',
+              success: success,
+              transactionId: success ? `txn_${Date.now()}` : null,
+              amount: data.amount,
+              message: success ? 'Payment successful' : 'Payment declined'
+            }));
+          }, 2000); // Simulate 2s processing time
           break;
 
         default:

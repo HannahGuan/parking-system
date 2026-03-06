@@ -4,6 +4,7 @@ import Confirmation from "./pages/Confirmation";
 import ActiveSession from "./pages/ActiveSession";
 import Payment from "./pages/Payment";
 import Receipt from "./pages/Receipt";
+import PaymentMethods from "./pages/PaymentMethods";
 import Layout from "./components/Layout";
 
 export const router = createBrowserRouter([
@@ -16,6 +17,7 @@ export const router = createBrowserRouter([
       { path: "active", Component: ActiveSession },
       { path: "payment", Component: Payment },
       { path: "receipt", Component: Receipt },
+      { path: "payment-methods", Component: PaymentMethods },
     ],
   },
 ]);

@@ -41,12 +41,20 @@ export function useWebSocket() {
               navigate('/spot-found');
               break;
             case 'NAVIGATE_TO_SESSION_STARTED':
+              // Dispatch custom event with duration for SessionStarted component
+              window.dispatchEvent(new CustomEvent('sessionStarted', {
+                detail: { duration: data.duration }
+              }));
               navigate('/session-started');
               break;
             case 'GO_BLACK':
               navigate('/black-screen');
               break;
             case 'NAVIGATE_TO_SESSION_ACTIVE':
+              // Dispatch custom event with duration for SessionActive component
+              window.dispatchEvent(new CustomEvent('sessionActive', {
+                detail: { duration: data.duration }
+              }));
               navigate('/session-active');
               break;
             case 'UPDATE_PLATE':
@@ -55,6 +63,13 @@ export function useWebSocket() {
                 detail: { plateNumber: data.plateNumber }
               }));
               console.log('Plate number updated:', data.plateNumber);
+              break;
+            case 'PAYMENT_METHODS_RESPONSE':
+              // Dispatch custom event for payment methods update
+              window.dispatchEvent(new CustomEvent('paymentMethodsUpdated', {
+                detail: { paymentMethods: data.paymentMethods }
+              }));
+              console.log('Payment methods updated:', data.paymentMethods);
               break;
             default:
               console.log('Unhandled event:', data.event);

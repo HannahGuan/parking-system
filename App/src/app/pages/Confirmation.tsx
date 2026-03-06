@@ -3,16 +3,33 @@ import { useNavigate } from 'react-router';
 import { motion } from 'motion/react';
 import { Info, MapPin, DollarSign, Car } from 'lucide-react';
 import { DurationSelector } from '../components/DurationSelector';
+import { useWebSocket } from '../hooks/useWebSocket';
+
+interface PaymentMethod {
+  id: string;
+  last4: string;
+  brand: string;
+  expMonth: string;
+  expYear: string;
+  isDefault: boolean;
+}
 
 export default function Confirmation() {
   const navigate = useNavigate();
+  const { sendMessage } = useWebSocket();
   const [duration, setDuration] = useState(60);
   const [plateNumber, setPlateNumber] = useState('ABC-1234');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
   const RATE_PER_HOUR = 2.50;
 
   const calculateCost = () => {
     return ((duration / 60) * RATE_PER_HOUR).toFixed(2);
   };
+
+  // Request payment methods on mount
+  React.useEffect(() => {
+    sendMessage({ event: 'GET_PAYMENT_METHODS' });
+  }, []);
 
   // Listen for plate number updates from WebSocket
   React.useEffect(() => {
@@ -23,6 +40,24 @@ export default function Confirmation() {
     window.addEventListener('updatePlate', handlePlateUpdate);
     return () => window.removeEventListener('updatePlate', handlePlateUpdate);
   }, []);
+
+  // Listen for payment methods updates
+  React.useEffect(() => {
+    const handlePaymentMethodsUpdate = ((event: CustomEvent) => {
+      const methods = event.detail.paymentMethods as PaymentMethod[];
+      const defaultMethod = methods.find(pm => pm.isDefault) || methods[0] || null;
+      setPaymentMethod(defaultMethod);
+    }) as EventListener;
+
+    window.addEventListener('paymentMethodsUpdated', handlePaymentMethodsUpdate);
+    return () => window.removeEventListener('paymentMethodsUpdated', handlePaymentMethodsUpdate);
+  }, []);
+
+  const handleConfirm = () => {
+    // Send START_SESSION event to backend with duration
+    sendMessage({ event: 'START_SESSION', duration });
+    // Navigation will happen via WebSocket response
+  };
 
   return (
     <div className="h-full flex flex-col relative overflow-hidden bg-[#f0f4f2]">
@@ -110,10 +145,31 @@ export default function Confirmation() {
           {/* Payment Method */}
           <div className="bg-emerald-50/60 rounded-2xl px-4 py-4">
             <p className="text-[11px] text-gray-400 font-medium mb-2.5">Payment Method</p>
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-7 rounded-md bg-gradient-to-br from-emerald-500 to-teal-600 shadow-sm" />
-              <span className="text-[15px] font-bold text-gray-900 tracking-wide">•••• 4242</span>
-            </div>
+            {paymentMethod ? (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-11 h-7 rounded-md ${
+                    paymentMethod.brand === 'visa' ? 'bg-gradient-to-br from-blue-500 to-blue-600' :
+                    paymentMethod.brand === 'mastercard' ? 'bg-gradient-to-br from-red-500 to-orange-500' :
+                    'bg-gradient-to-br from-emerald-500 to-teal-600'
+                  } shadow-sm`} />
+                  <span className="text-[15px] font-bold text-gray-900 tracking-wide">•••• {paymentMethod.last4}</span>
+                </div>
+                <button
+                  onClick={() => navigate('/payment-methods')}
+                  className="text-xs text-emerald-600 font-semibold"
+                >
+                  Change
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => navigate('/payment-methods')}
+                className="w-full bg-white border-2 border-dashed border-gray-300 rounded-lg py-3 text-sm font-semibold text-gray-600 hover:border-emerald-500 hover:text-emerald-600 transition-all"
+              >
+                + Add Payment Method
+              </button>
+            )}
           </div>
         </motion.div>
       </main>
@@ -127,7 +183,7 @@ export default function Confirmation() {
           Cancel
         </button>
         <button
-          onClick={() => navigate('/active')}
+          onClick={handleConfirm}
           className="flex-[1.3] bg-emerald-500 text-white py-3.5 rounded-2xl font-bold text-[15px] hover:bg-emerald-600 active:scale-[0.97] transition-all shadow-lg shadow-emerald-500/20"
         >
           Pay ${calculateCost()}

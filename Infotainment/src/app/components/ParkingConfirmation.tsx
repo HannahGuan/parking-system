@@ -30,12 +30,22 @@ function distanceFeet(a: { lat: number; lng: number }, b: { lat: number; lng: nu
   return 2 * R * Math.asin(Math.sqrt(sin2));
 }
 
+interface PaymentMethod {
+  id: string;
+  last4: string;
+  brand: string;
+  expMonth: string;
+  expYear: string;
+  isDefault: boolean;
+}
+
 export function ParkingConfirmation() {
   const navigate = useNavigate();
   const { sendMessage } = useWebSocket();
   const [coords, setCoords] = useState<{ lat: number; lng: number }>(LITTLEFIELD);
   const [duration, setDuration] = useState(60);
   const [plateNumber, setPlateNumber] = useState('ABC-1234');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
   const RATE_PER_HOUR = 2.50;
   const lastCoords = useRef<{ lat: number; lng: number } | null>(null);
 
@@ -56,6 +66,11 @@ export function ParkingConfirmation() {
     return () => navigator.geolocation.clearWatch(watchId);
   }, []);
 
+  // Request payment methods on mount
+  useEffect(() => {
+    sendMessage({ event: 'GET_PAYMENT_METHODS' });
+  }, []);
+
   // Listen for plate number updates from WebSocket
   useEffect(() => {
     const handlePlateUpdate = ((event: CustomEvent) => {
@@ -64,6 +79,18 @@ export function ParkingConfirmation() {
 
     window.addEventListener('updatePlate', handlePlateUpdate);
     return () => window.removeEventListener('updatePlate', handlePlateUpdate);
+  }, []);
+
+  // Listen for payment methods updates
+  useEffect(() => {
+    const handlePaymentMethodsUpdate = ((event: CustomEvent) => {
+      const methods = event.detail.paymentMethods as PaymentMethod[];
+      const defaultMethod = methods.find(pm => pm.isDefault) || methods[0] || null;
+      setPaymentMethod(defaultMethod);
+    }) as EventListener;
+
+    window.addEventListener('paymentMethodsUpdated', handlePaymentMethodsUpdate);
+    return () => window.removeEventListener('paymentMethodsUpdated', handlePaymentMethodsUpdate);
   }, []);
 
   const handleConfirm = () => {
@@ -120,70 +147,91 @@ export function ParkingConfirmation() {
       <div className="absolute inset-0 z-10 bg-gradient-to-b from-transparent via-transparent to-gray-900/90 pointer-events-none" />
 
       {/* Modal Dialog */}
-      <div className="absolute inset-0 z-20 flex items-center justify-center p-4">
-        <div className="w-full max-w-2xl bg-white rounded-xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
+      <div className="absolute inset-0 z-20 flex items-center justify-center p-3">
+        <div className="w-full max-w-xl bg-white rounded-lg shadow-2xl overflow-hidden max-h-[85vh] overflow-y-auto">
           {/* Header */}
-          <div className="bg-blue-600 px-6 py-3 flex items-center gap-2">
-            <Info className="w-5 h-5 text-white" />
-            <h2 className="text-white font-bold text-base uppercase tracking-wide">
-              Confirm Parking Details
+          <div className="bg-blue-600 px-4 py-2 flex items-center gap-1.5">
+            <Info className="w-4 h-4 text-white" />
+            <h2 className="text-white font-bold text-sm uppercase tracking-wide">
+              Confirm Parking
             </h2>
           </div>
 
           {/* Content */}
-          <div className="p-5">
-            <h1 className="text-xl font-bold text-gray-900 mb-1 text-center">
+          <div className="p-4">
+            <h1 className="text-lg font-bold text-gray-900 mb-0.5 text-center">
               Start Parking Session?
             </h1>
-            <p className="text-gray-600 text-center mb-4 text-sm">
+            <p className="text-gray-600 text-center mb-3 text-xs">
               Review details and select duration
             </p>
 
             {/* Details */}
-            <div className="grid grid-cols-2 gap-3 mb-5">
-              <div className="bg-gray-50 rounded-lg p-3 flex items-center gap-3 shadow-sm">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <MapPin className="w-5 h-5 text-blue-600" />
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              <div className="bg-gray-50 rounded-md p-2 flex items-center gap-2 shadow-sm">
+                <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center shrink-0">
+                  <MapPin className="w-4 h-4 text-blue-600" />
                 </div>
-                <div className="flex-1">
-                  <p className="text-xs text-gray-600">Location</p>
-                  <p className="font-semibold text-gray-900 text-sm">Littlefield Courtyard</p>
-                </div>
-              </div>
-
-              <div className="bg-gray-50 rounded-lg p-3 flex items-center gap-3 shadow-sm">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <DollarSign className="w-5 h-5 text-green-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-xs text-gray-600">Rate</p>
-                  <p className="font-semibold text-gray-900 text-sm">${RATE_PER_HOUR}/hour</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-gray-600">Location</p>
+                  <p className="font-semibold text-gray-900 text-xs truncate">Littlefield Courtyard</p>
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-lg p-3 flex items-center gap-3 shadow-sm">
-                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <CreditCard className="w-5 h-5 text-orange-600" />
+              <div className="bg-gray-50 rounded-md p-2 flex items-center gap-2 shadow-sm">
+                <div className="w-8 h-8 bg-green-100 rounded-md flex items-center justify-center shrink-0">
+                  <DollarSign className="w-4 h-4 text-green-600" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs text-gray-600">Payment Method</p>
-                  <p className="font-semibold text-gray-900 text-sm">•••• 4242</p>
+                  <p className="text-[10px] text-gray-600">Rate</p>
+                  <p className="font-semibold text-gray-900 text-xs">${RATE_PER_HOUR}/hour</p>
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-lg p-3 flex items-center gap-3 shadow-sm">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Car className="w-5 h-5 text-blue-600" />
+              <button
+                onClick={() => navigate('/payment-methods')}
+                className="bg-gray-50 rounded-md p-2 flex items-center gap-2 shadow-sm hover:bg-gray-100 transition-colors w-full text-left"
+              >
+                <div className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 ${
+                  paymentMethod
+                    ? paymentMethod.brand === 'visa'
+                      ? 'bg-blue-100'
+                      : paymentMethod.brand === 'mastercard'
+                      ? 'bg-red-100'
+                      : 'bg-orange-100'
+                    : 'bg-orange-100'
+                }`}>
+                  <CreditCard className={`w-4 h-4 ${
+                    paymentMethod
+                      ? paymentMethod.brand === 'visa'
+                        ? 'text-blue-600'
+                        : paymentMethod.brand === 'mastercard'
+                        ? 'text-red-600'
+                        : 'text-orange-600'
+                      : 'text-orange-600'
+                  }`} />
                 </div>
-                <div className="flex-1">
-                  <p className="text-xs text-gray-600">Registered Vehicle</p>
-                  <p className="font-semibold text-gray-900 text-sm font-mono tracking-wider">{plateNumber}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-gray-600">Payment</p>
+                  <p className="font-semibold text-gray-900 text-xs truncate">
+                    {paymentMethod ? `•••• ${paymentMethod.last4}` : '+ Add Card'}
+                  </p>
+                </div>
+              </button>
+
+              <div className="bg-gray-50 rounded-md p-2 flex items-center gap-2 shadow-sm">
+                <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center shrink-0">
+                  <Car className="w-4 h-4 text-blue-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-gray-600">Vehicle</p>
+                  <p className="font-semibold text-gray-900 text-xs font-mono tracking-wider truncate">{plateNumber}</p>
                 </div>
               </div>
             </div>
 
             {/* Duration Selector */}
-            <div className="mb-5">
+            <div className="mb-3">
               <DurationSelector
                 onDurationChange={setDuration}
                 selectedDuration={duration}
@@ -192,34 +240,34 @@ export function ParkingConfirmation() {
             </div>
 
             {/* Total Cost Display */}
-            <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-3 mb-4">
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-md p-2 mb-3">
               <div className="flex justify-between items-center">
-                <span className="text-gray-700 font-semibold text-sm">Total Prepaid Amount:</span>
-                <span className="text-xl font-bold text-blue-600">${calculateCost()}</span>
+                <span className="text-gray-700 font-semibold text-xs">Total Prepaid:</span>
+                <span className="text-lg font-bold text-blue-600">${calculateCost()}</span>
               </div>
-              <p className="text-xs text-gray-600 mt-1">
+              <p className="text-[10px] text-gray-600 mt-0.5">
                 For {duration} minute{duration !== 1 ? 's' : ''} of parking
               </p>
             </div>
 
             {/* Action Buttons */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               <Button
                 onClick={() => navigate('/')}
                 variant="outline"
-                className="bg-white border-2 border-gray-400 hover:bg-gray-100 text-gray-800 font-semibold py-4 rounded-lg text-sm"
+                className="bg-white border-2 border-gray-400 hover:bg-gray-100 text-gray-800 font-semibold py-3 rounded-md text-xs"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleConfirm}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 rounded-lg text-sm shadow-lg"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-md text-xs shadow-lg"
               >
                 Confirm & Pay ${calculateCost()}
               </Button>
             </div>
 
-            <p className="text-center text-gray-400 text-xs mt-3">
+            <p className="text-center text-gray-400 text-[10px] mt-2">
               Press SPACE to confirm
             </p>
           </div>

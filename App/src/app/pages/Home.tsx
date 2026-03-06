@@ -2,7 +2,7 @@ import 'leaflet/dist/leaflet.css';
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { Navigation, Car } from 'lucide-react';
+import { Navigation, Car, CreditCard } from 'lucide-react';
 import { MapContainer, TileLayer, CircleMarker, Circle, useMap } from 'react-leaflet';
 import { useWebSocket } from '../hooks/useWebSocket';
 
@@ -126,6 +126,16 @@ export default function Home() {
           <Navigation size={16} className="text-emerald-600 fill-emerald-600 -rotate-45 translate-x-0.5" />
           <span className="font-bold text-gray-900 text-[15px]">Navigating...</span>
         </div>
+      </div>
+
+      {/* Payment Methods Button */}
+      <div className="absolute top-14 right-6 z-[1000]">
+        <button
+          onClick={() => navigate('/payment-methods')}
+          className="bg-white p-3 rounded-full shadow-lg hover:bg-gray-50 active:scale-95 transition-all ring-1 ring-black/5"
+        >
+          <CreditCard size={20} className="text-gray-700" />
+        </button>
       </div>
 
       {/* Spot Found Notification */}
