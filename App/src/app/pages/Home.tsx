@@ -81,11 +81,23 @@ export default function Home() {
 
   const LITTLEFIELD = { lat: 37.430169, lng: -122.167604 };
   const LITTLEFIELD_RADIUS_FEET = 25;
+  const TEST_SPACE = { lat: 37.4238, lng: -122.1596 };
+  const TEST_SPACE_RADIUS_FEET = 25;
+
   // Show spot found when within 25 feet of Littlefield courtyard
   useEffect(() => {
     if (showSpotFound || !coords) return;
     if (distanceFeet(coords, LITTLEFIELD) <= LITTLEFIELD_RADIUS_FEET) {
       setSpotLabel('Littlefield courtyard');
+      setShowSpotFound(true);
+    }
+  }, [coords, showSpotFound]);
+
+  // Show spot found when within 25 feet of Test Space
+  useEffect(() => {
+    if (showSpotFound || !coords) return;
+    if (distanceFeet(coords, TEST_SPACE) <= TEST_SPACE_RADIUS_FEET) {
+      setSpotLabel('Test Space');
       setShowSpotFound(true);
     }
   }, [coords, showSpotFound]);
@@ -109,6 +121,11 @@ export default function Home() {
         <Circle
           center={[LITTLEFIELD.lat, LITTLEFIELD.lng]}
           radius={LITTLEFIELD_RADIUS_FEET * 0.3048}
+          pathOptions={{ color: '#10b981', fillColor: '#10b981', fillOpacity: 0.2, weight: 2 }}
+        />
+        <Circle
+          center={[TEST_SPACE.lat, TEST_SPACE.lng]}
+          radius={TEST_SPACE_RADIUS_FEET * 0.3048}
           pathOptions={{ color: '#10b981', fillColor: '#10b981', fillOpacity: 0.2, weight: 2 }}
         />
         {coords && (

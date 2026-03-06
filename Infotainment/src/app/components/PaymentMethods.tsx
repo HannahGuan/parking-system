@@ -56,7 +56,9 @@ export function PaymentMethods() {
     });
 
     setPaymentMethods([...paymentMethods, newCard]);
-    setShowAddCard(false);
+
+    // Navigate back to previous page (likely parking-confirmation)
+    navigate(-1);
   };
 
   const handleRemoveCard = (id: string) => {

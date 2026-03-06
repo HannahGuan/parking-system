@@ -56,7 +56,9 @@ export default function PaymentMethods() {
     });
 
     setPaymentMethods([...paymentMethods, newCard]);
-    setShowAddCard(false);
+
+    // Navigate back to previous page
+    navigate(-1);
   };
 
   const handleRemoveCard = (id: string) => {

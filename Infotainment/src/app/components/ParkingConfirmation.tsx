@@ -66,9 +66,28 @@ export function ParkingConfirmation() {
     return () => navigator.geolocation.clearWatch(watchId);
   }, []);
 
-  // Request payment methods on mount
+  // Request payment methods on mount and when returning to this page
   useEffect(() => {
     sendMessage({ event: 'GET_PAYMENT_METHODS' });
+
+    // Also request when page becomes visible (user returns from payment-methods)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        sendMessage({ event: 'GET_PAYMENT_METHODS' });
+      }
+    };
+
+    const handleFocus = () => {
+      sendMessage({ event: 'GET_PAYMENT_METHODS' });
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   // Listen for plate number updates from WebSocket
