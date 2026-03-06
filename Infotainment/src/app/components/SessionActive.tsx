@@ -116,7 +116,7 @@ export function SessionActive() {
             "px-6 py-4 flex items-center justify-between transition-colors duration-300",
             isExpired ? "bg-gradient-to-r from-red-600 to-orange-600" :
             isLowTime ? "bg-gradient-to-r from-orange-600 to-yellow-600" :
-            "bg-gradient-to-r from-blue-600 to-purple-600"
+            "bg-gradient-to-r from-emerald-600 to-teal-600"
           )}>
             <div className="flex items-center gap-3">
               <Info className="w-6 h-6 text-white" />
@@ -127,11 +127,11 @@ export function SessionActive() {
             <div className={clsx(
               "px-4 py-1 rounded-full flex items-center gap-2 border",
               isExpired ? "bg-red-500/30 text-red-100 border-red-400/50" :
-              "bg-green-500/30 text-green-100 border-green-400/50"
+              "bg-emerald-500/30 text-emerald-100 border-emerald-400/50"
             )}>
               <div className={clsx(
                 "w-2 h-2 rounded-full",
-                isExpired ? "bg-red-300" : "bg-green-300 animate-pulse"
+                isExpired ? "bg-red-300" : "bg-emerald-300 animate-pulse"
               )}></div>
               <span className="text-sm font-semibold">
                 {isExpired ? "Expired" : "Active"}
@@ -146,14 +146,14 @@ export function SessionActive() {
               "rounded-2xl p-8 mb-6 text-center transition-colors duration-300",
               isExpired ? "bg-gradient-to-br from-red-100 to-orange-100" :
               isLowTime ? "bg-gradient-to-br from-orange-100 to-yellow-100" :
-              "bg-gradient-to-br from-blue-100 to-purple-100"
+              "bg-gradient-to-br from-emerald-100 to-teal-100"
             )}>
               <p className="text-gray-600 text-sm mb-3 uppercase tracking-wide">Time Remaining</p>
               <div className={clsx(
                 "text-7xl font-bold mb-4 bg-clip-text text-transparent transition-all duration-300",
                 isExpired ? "bg-gradient-to-r from-red-600 to-orange-600" :
                 isLowTime ? "bg-gradient-to-r from-orange-600 to-yellow-600" :
-                "bg-gradient-to-r from-blue-600 to-purple-600"
+                "bg-gradient-to-r from-emerald-600 to-teal-600"
               )}>
                 {formatCountdown(totalSeconds)}
               </div>
@@ -182,8 +182,8 @@ export function SessionActive() {
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="bg-white rounded-lg p-4 shadow-sm">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <MapPin className="w-5 h-5 text-blue-600" />
+                  <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                    <MapPin className="w-5 h-5 text-emerald-600" />
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">Location</p>
@@ -194,8 +194,8 @@ export function SessionActive() {
 
               <div className="bg-white rounded-lg p-4 shadow-sm">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                    <Clock className="w-5 h-5 text-green-600" />
+                  <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-emerald-600" />
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">Elapsed</p>
@@ -206,8 +206,8 @@ export function SessionActive() {
 
               <div className="bg-white rounded-lg p-4 shadow-sm">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <DollarSign className="w-5 h-5 text-purple-600" />
+                  <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                    <DollarSign className="w-5 h-5 text-emerald-600" />
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">Current Cost</p>
@@ -218,8 +218,8 @@ export function SessionActive() {
 
               <div className="bg-white rounded-lg p-4 shadow-sm">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <Clock className="w-5 h-5 text-orange-600" />
+                  <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-emerald-600" />
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">Total Paid Time</p>
@@ -235,7 +235,7 @@ export function SessionActive() {
                 <Button
                   onClick={handleExtend}
                   variant="outline"
-                  className="w-full bg-blue-50 border-2 border-blue-200 hover:bg-blue-100 text-blue-700 font-semibold py-4 rounded-lg flex items-center justify-center gap-2"
+                  className="w-full bg-emerald-50 border-2 border-emerald-200 hover:bg-emerald-100 text-emerald-700 font-semibold py-4 rounded-lg flex items-center justify-center gap-2"
                 >
                   <Clock className="w-5 h-5" />
                   Extend by {EXTEND_MINUTES} Minutes (+${(EXTEND_MINUTES / 60 * RATE_PER_HOUR).toFixed(2)})

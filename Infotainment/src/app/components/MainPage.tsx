@@ -8,6 +8,7 @@ import { MapContainer, TileLayer, CircleMarker, Circle, useMap } from 'react-lea
 const DEFAULT_CENTER: [number, number] = [37.4275, -122.1697];
 const DEFAULT_ZOOM = 17;
 const LITTLEFIELD = { lat: 37.430169, lng: -122.167604 };
+const TEST_SPACE = { lat: 37.4238, lng: -122.1596 };
 
 function MapController({ coords }: { coords: { lat: number; lng: number } | null }) {
   const map = useMap();
@@ -125,6 +126,13 @@ export function MainPage() {
             {/* Littlefield Parking Zone */}
             <Circle
               center={[LITTLEFIELD.lat, LITTLEFIELD.lng]}
+              radius={25 * 0.3048}
+              pathOptions={{ color: '#10b981', fillColor: '#10b981', fillOpacity: 0.2, weight: 2 }}
+            />
+
+            {/* Test Space Parking Zone */}
+            <Circle
+              center={[TEST_SPACE.lat, TEST_SPACE.lng]}
               radius={25 * 0.3048}
               pathOptions={{ color: '#10b981', fillColor: '#10b981', fillOpacity: 0.2, weight: 2 }}
             />

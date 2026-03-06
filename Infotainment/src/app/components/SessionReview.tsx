@@ -33,7 +33,7 @@ export function SessionReview() {
       <div className="absolute inset-0 flex items-center justify-center p-8">
         <div className="w-full max-w-lg bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl shadow-2xl overflow-hidden">
           {/* Header */}
-          <div className="bg-green-600 px-6 py-4 flex items-center gap-3">
+          <div className="bg-emerald-600 px-6 py-4 flex items-center gap-3">
             <CheckCircle className="w-6 h-6 text-white" />
             <h2 className="text-white font-semibold text-lg uppercase tracking-wide">
               Session Complete
@@ -44,8 +44,8 @@ export function SessionReview() {
           <div className="p-8 text-center">
             {/* Success Icon */}
             <div className="flex justify-center mb-6">
-              <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center">
-                <CheckCircle className="w-14 h-14 text-green-600" />
+              <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-14 h-14 text-emerald-600" />
               </div>
             </div>
 
@@ -57,16 +57,16 @@ export function SessionReview() {
             </p>
 
             {/* Info Text */}
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-8">
-              <p className="text-sm text-green-800">
+            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-8">
+              <p className="text-sm text-emerald-800">
                 Payment processed successfully to •••• 4242
               </p>
             </div>
 
             {/* Action Button */}
-            <Button 
+            <Button
               onClick={handleDone}
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-6 rounded-lg"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-6 rounded-lg"
             >
               Back to Home
             </Button>

@@ -33,7 +33,7 @@ export function SessionStarted() {
       <div className="absolute inset-0 flex items-center justify-center p-8">
         <div className="w-full max-w-lg bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl shadow-2xl overflow-hidden">
           {/* Header */}
-          <div className="bg-green-600 px-6 py-4 flex items-center gap-3">
+          <div className="bg-emerald-600 px-6 py-4 flex items-center gap-3">
             <CheckCircle className="w-6 h-6 text-white" />
             <h2 className="text-white font-semibold text-lg uppercase tracking-wide">
               Success
@@ -44,8 +44,8 @@ export function SessionStarted() {
           <div className="p-8 text-center">
             {/* Success Icon */}
             <div className="flex justify-center mb-6">
-              <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center">
-                <CheckCircle className="w-14 h-14 text-green-600" />
+              <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-14 h-14 text-emerald-600" />
               </div>
             </div>
 
@@ -60,7 +60,7 @@ export function SessionStarted() {
             <div className="space-y-4 mb-8">
               <div className="bg-white rounded-lg p-4 flex items-center justify-between shadow-sm">
                 <div className="flex items-center gap-3">
-                  <Info className="w-5 h-5 text-blue-600" />
+                  <Info className="w-5 h-5 text-emerald-600" />
                   <span className="text-gray-700">Location</span>
                 </div>
                 <span className="font-semibold text-gray-900">Main Street, Zone A</span>
@@ -68,7 +68,7 @@ export function SessionStarted() {
 
               <div className="bg-white rounded-lg p-4 flex items-center justify-between shadow-sm">
                 <div className="flex items-center gap-3">
-                  <Clock className="w-5 h-5 text-purple-600" />
+                  <Clock className="w-5 h-5 text-emerald-600" />
                   <span className="text-gray-700">Started at</span>
                 </div>
                 <span className="font-semibold text-gray-900">2:30 PM</span>
@@ -81,9 +81,9 @@ export function SessionStarted() {
             </p>
 
             {/* Action Button */}
-            <Button 
+            <Button
               onClick={handleViewSession}
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-6 rounded-lg"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-6 rounded-lg"
             >
               View Session
             </Button>

@@ -52,8 +52,8 @@ export function EndSession() {
             {/* Session Summary */}
             <div className="space-y-4 mb-8">
               <div className="bg-white rounded-lg p-4 flex items-center gap-4 shadow-sm">
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-purple-600" />
+                <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
+                  <Clock className="w-6 h-6 text-emerald-600" />
                 </div>
                 <div className="flex-1">
                   <p className="text-sm text-gray-600">Duration</p>
@@ -62,8 +62,8 @@ export function EndSession() {
               </div>
 
               <div className="bg-white rounded-lg p-4 flex items-center gap-4 shadow-sm">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <DollarSign className="w-6 h-6 text-green-600" />
+                <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
+                  <DollarSign className="w-6 h-6 text-emerald-600" />
                 </div>
                 <div className="flex-1">
                   <p className="text-sm text-gray-600">Total Cost</p>
@@ -72,8 +72,8 @@ export function EndSession() {
               </div>
 
               <div className="bg-white rounded-lg p-4 flex items-center gap-4 shadow-sm">
-                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <CreditCard className="w-6 h-6 text-orange-600" />
+                <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
+                  <CreditCard className="w-6 h-6 text-emerald-600" />
                 </div>
                 <div className="flex-1">
                   <p className="text-sm text-gray-600">Payment Method</p>
@@ -83,8 +83,8 @@ export function EndSession() {
             </div>
 
             {/* Info Text */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
-              <p className="text-sm text-blue-800 text-center">
+            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-8">
+              <p className="text-sm text-emerald-800 text-center">
                 Payment will be processed automatically
               </p>
             </div>

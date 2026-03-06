@@ -169,7 +169,7 @@ export function ParkingConfirmation() {
       <div className="absolute inset-0 z-20 flex items-center justify-center p-3">
         <div className="w-full max-w-xl bg-white rounded-lg shadow-2xl overflow-hidden max-h-[85vh] overflow-y-auto">
           {/* Header */}
-          <div className="bg-blue-600 px-4 py-2 flex items-center gap-1.5">
+          <div className="bg-emerald-600 px-4 py-2 flex items-center gap-1.5">
             <Info className="w-4 h-4 text-white" />
             <h2 className="text-white font-bold text-sm uppercase tracking-wide">
               Confirm Parking
@@ -188,8 +188,8 @@ export function ParkingConfirmation() {
             {/* Details */}
             <div className="grid grid-cols-2 gap-2 mb-3">
               <div className="bg-gray-50 rounded-md p-2 flex items-center gap-2 shadow-sm">
-                <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center shrink-0">
-                  <MapPin className="w-4 h-4 text-blue-600" />
+                <div className="w-8 h-8 bg-emerald-100 rounded-md flex items-center justify-center shrink-0">
+                  <MapPin className="w-4 h-4 text-emerald-600" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[10px] text-gray-600">Location</p>
@@ -198,8 +198,8 @@ export function ParkingConfirmation() {
               </div>
 
               <div className="bg-gray-50 rounded-md p-2 flex items-center gap-2 shadow-sm">
-                <div className="w-8 h-8 bg-green-100 rounded-md flex items-center justify-center shrink-0">
-                  <DollarSign className="w-4 h-4 text-green-600" />
+                <div className="w-8 h-8 bg-emerald-100 rounded-md flex items-center justify-center shrink-0">
+                  <DollarSign className="w-4 h-4 text-emerald-600" />
                 </div>
                 <div className="flex-1">
                   <p className="text-[10px] text-gray-600">Rate</p>
@@ -239,8 +239,8 @@ export function ParkingConfirmation() {
               </button>
 
               <div className="bg-gray-50 rounded-md p-2 flex items-center gap-2 shadow-sm">
-                <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center shrink-0">
-                  <Car className="w-4 h-4 text-blue-600" />
+                <div className="w-8 h-8 bg-emerald-100 rounded-md flex items-center justify-center shrink-0">
+                  <Car className="w-4 h-4 text-emerald-600" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[10px] text-gray-600">Vehicle</p>
@@ -259,10 +259,10 @@ export function ParkingConfirmation() {
             </div>
 
             {/* Total Cost Display */}
-            <div className="bg-blue-50 border-2 border-blue-200 rounded-md p-2 mb-3">
+            <div className="bg-emerald-50 border-2 border-emerald-200 rounded-md p-2 mb-3">
               <div className="flex justify-between items-center">
                 <span className="text-gray-700 font-semibold text-xs">Total Prepaid:</span>
-                <span className="text-lg font-bold text-blue-600">${calculateCost()}</span>
+                <span className="text-lg font-bold text-emerald-600">${calculateCost()}</span>
               </div>
               <p className="text-[10px] text-gray-600 mt-0.5">
                 For {duration} minute{duration !== 1 ? 's' : ''} of parking
@@ -280,7 +280,7 @@ export function ParkingConfirmation() {
               </Button>
               <Button
                 onClick={handleConfirm}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-md text-xs shadow-lg"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-md text-xs shadow-lg"
               >
                 Confirm & Pay ${calculateCost()}
               </Button>

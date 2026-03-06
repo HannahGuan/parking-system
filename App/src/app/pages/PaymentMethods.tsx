@@ -34,12 +34,29 @@ export default function PaymentMethods() {
       setIsLoading(false);
     }) as EventListener;
 
+    // Also request when page becomes visible (sync with other client)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        sendMessage({ event: 'GET_PAYMENT_METHODS' });
+      }
+    };
+
+    const handleFocus = () => {
+      sendMessage({ event: 'GET_PAYMENT_METHODS' });
+    };
+
     window.addEventListener('paymentMethodsUpdated', handlePaymentMethods);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
 
     // Simulate loading
     setTimeout(() => setIsLoading(false), 500);
 
-    return () => window.removeEventListener('paymentMethodsUpdated', handlePaymentMethods);
+    return () => {
+      window.removeEventListener('paymentMethodsUpdated', handlePaymentMethods);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   const handleCardSave = (card: { last4: string; brand: string; expMonth: string; expYear: string }) => {
