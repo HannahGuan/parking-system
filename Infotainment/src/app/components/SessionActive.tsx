@@ -35,6 +35,21 @@ export function SessionActive() {
     return () => window.removeEventListener('sessionActive', handleSessionActive);
   }, []);
 
+  // Listen for time extension from other clients
+  useEffect(() => {
+    const handleTimeExtended = ((event: CustomEvent) => {
+      if (event.detail?.extensionMinutes) {
+        const minutes = event.detail.extensionMinutes;
+        setTotalSeconds(prev => prev + minutes * 60);
+        setExtensions(prev => prev + 1);
+        console.log('Time extended from another client:', minutes, 'minutes');
+      }
+    }) as EventListener;
+
+    window.addEventListener('timeExtended', handleTimeExtended);
+    return () => window.removeEventListener('timeExtended', handleTimeExtended);
+  }, []);
+
   // Countdown timer
   useEffect(() => {
     const interval = setInterval(() => {
@@ -74,6 +89,8 @@ export function SessionActive() {
   const handleExtend = () => {
     setTotalSeconds(prev => prev + EXTEND_MINUTES * 60);
     setExtensions(prev => prev + 1);
+    // Notify other clients about time extension
+    sendMessage({ event: 'EXTEND_TIME', extensionMinutes: EXTEND_MINUTES });
   };
 
   const handleEndSession = () => {

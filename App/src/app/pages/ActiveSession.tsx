@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, MapPin, ShieldCheck, Timer, DollarSign } from 'lucide-react';
 import { clsx } from 'clsx';
+import { useWebSocket } from '../hooks/useWebSocket';
 
 const INITIAL_MINUTES = 30;
 const EXTEND_MINUTES = 30;
@@ -10,6 +11,7 @@ const RATE_PER_HOUR = 2.50;
 
 export default function ActiveSession() {
   const navigate = useNavigate();
+  const { sendMessage } = useWebSocket();
   const [totalSeconds, setTotalSeconds] = useState(INITIAL_MINUTES * 60);
   const [elapsed, setElapsed] = useState(0);
   const [extensions, setExtensions] = useState(0);
@@ -32,6 +34,23 @@ export default function ActiveSession() {
 
     window.addEventListener('sessionActive', handleSessionActive);
     return () => window.removeEventListener('sessionActive', handleSessionActive);
+  }, []);
+
+  // Listen for time extension from other clients
+  useEffect(() => {
+    const handleTimeExtended = ((event: CustomEvent) => {
+      if (event.detail?.extensionMinutes) {
+        const minutes = event.detail.extensionMinutes;
+        setTotalSeconds(prev => prev + minutes * 60);
+        setExtensions(prev => prev + 1);
+        setShowExtendConfirm(true);
+        setTimeout(() => setShowExtendConfirm(false), 2000);
+        console.log('Time extended from another client:', minutes, 'minutes');
+      }
+    }) as EventListener;
+
+    window.addEventListener('timeExtended', handleTimeExtended);
+    return () => window.removeEventListener('timeExtended', handleTimeExtended);
   }, []);
 
   useEffect(() => {
@@ -70,11 +89,15 @@ export default function ActiveSession() {
     setExtensions(prev => prev + 1);
     setShowExtendConfirm(true);
     setTimeout(() => setShowExtendConfirm(false), 2000);
+    // Notify other clients about time extension
+    sendMessage({ event: 'EXTEND_TIME', extensionMinutes: EXTEND_MINUTES });
   };
 
   const handleEndSession = () => {
     const totalParkedSeconds = elapsed;
     const cost = ((totalParkedSeconds / 3600) * RATE_PER_HOUR).toFixed(2);
+    // Notify backend to end session for all clients
+    sendMessage({ event: 'END_SESSION_FROM_APP' });
     navigate('/payment', { state: { cost, duration: totalParkedSeconds } });
   };
 

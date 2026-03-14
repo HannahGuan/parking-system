@@ -26,6 +26,14 @@ const clients = {
 // Store payment methods in memory (simple demo version)
 let paymentMethods = [];
 
+// Store active session state (simple demo version - will be lost on server restart)
+let activeSession = {
+  isActive: false,
+  startTime: null,
+  duration: 0, // in minutes
+  extensionCount: 0
+};
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({
@@ -76,6 +84,14 @@ wss.on('connection', (ws, req) => {
           // Infotainment confirms parking -> Both apps navigate
           console.log('Broadcasting START_SESSION with duration:', data.duration);
 
+          // Store session state
+          activeSession = {
+            isActive: true,
+            startTime: Date.now(),
+            duration: data.duration,
+            extensionCount: 0
+          };
+
           // App goes to Active page
           broadcast(clients.app, {
             event: 'NAVIGATE_TO_ACTIVE',
@@ -94,8 +110,25 @@ wss.on('connection', (ws, req) => {
         case 'END_SESSION':
           // Infotainment ends session -> App goes to Payment
           console.log('Broadcasting END_SESSION to App clients');
+
+          // Mark session as inactive
+          activeSession.isActive = false;
+
           broadcast(clients.app, {
             event: 'NAVIGATE_TO_PAYMENT',
+            timestamp: Date.now()
+          });
+          break;
+
+        case 'END_SESSION_FROM_APP':
+          // App ends session -> Infotainment should also end
+          console.log('Broadcasting END_SESSION_FROM_APP to Infotainment clients');
+
+          // Mark session as inactive
+          activeSession.isActive = false;
+
+          broadcast(clients.infotainment, {
+            event: 'NAVIGATE_TO_END_SESSION',
             timestamp: Date.now()
           });
           break;
@@ -121,8 +154,20 @@ wss.on('connection', (ws, req) => {
         case 'USER_RETURNS_CAR':
           // WizardOfOz triggers this -> Infotainment shows session-active
           console.log('Broadcasting NAVIGATE_TO_SESSION_ACTIVE to Infotainment clients');
+
+          // Calculate remaining duration based on stored session state
+          let remainingDuration = activeSession.duration;
+          if (activeSession.isActive && activeSession.startTime) {
+            const elapsedSeconds = Math.floor((Date.now() - activeSession.startTime) / 1000);
+            const totalSeconds = (activeSession.duration + activeSession.extensionCount * 30) * 60;
+            const remainingSeconds = Math.max(0, totalSeconds - elapsedSeconds);
+            remainingDuration = Math.ceil(remainingSeconds / 60); // convert back to minutes
+          }
+
           broadcast(clients.infotainment, {
             event: 'NAVIGATE_TO_SESSION_ACTIVE',
+            duration: activeSession.duration,
+            remainingMinutes: remainingDuration,
             timestamp: Date.now()
           });
           break;
@@ -252,6 +297,27 @@ wss.on('connection', (ws, req) => {
           }, 2000); // Simulate 2s processing time
           break;
 
+        case 'EXTEND_TIME':
+          // One client extends time -> broadcast to OTHER clients only
+          console.log('Broadcasting EXTEND_TIME to other clients');
+
+          // Update session state
+          if (activeSession.isActive) {
+            activeSession.extensionCount += 1;
+          }
+
+          broadcastExcept(clients.app, ws, {
+            event: 'TIME_EXTENDED',
+            extensionMinutes: data.extensionMinutes,
+            timestamp: Date.now()
+          });
+          broadcastExcept(clients.infotainment, ws, {
+            event: 'TIME_EXTENDED',
+            extensionMinutes: data.extensionMinutes,
+            timestamp: Date.now()
+          });
+          break;
+
         default:
           console.log('Unknown event:', data.event);
       }
@@ -278,6 +344,16 @@ function broadcast(clientSet, message) {
   const messageStr = JSON.stringify(message);
   clientSet.forEach((client) => {
     if (client.readyState === 1) { // WebSocket.OPEN
+      client.send(messageStr);
+    }
+  });
+}
+
+// Helper function to broadcast messages to specific client set except sender
+function broadcastExcept(clientSet, senderWs, message) {
+  const messageStr = JSON.stringify(message);
+  clientSet.forEach((client) => {
+    if (client.readyState === 1 && client !== senderWs) { // WebSocket.OPEN and not sender
       client.send(messageStr);
     }
   });

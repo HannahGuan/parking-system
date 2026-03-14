@@ -99,6 +99,13 @@ export function useWebSocket(onSpotFound?: () => void, onConfigureTrigger?: (ena
               }));
               console.log('Payment result:', data);
               break;
+            case 'TIME_EXTENDED':
+              // Another client extended time -> update local timer
+              window.dispatchEvent(new CustomEvent('timeExtended', {
+                detail: { extensionMinutes: data.extensionMinutes }
+              }));
+              console.log('Time extended by another client:', data.extensionMinutes, 'minutes');
+              break;
             default:
               console.log('Unhandled event:', data.event);
           }

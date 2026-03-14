@@ -71,6 +71,18 @@ export function useWebSocket() {
               }));
               console.log('Payment methods updated:', data.paymentMethods);
               break;
+            case 'TIME_EXTENDED':
+              // Another client extended time -> update local timer
+              window.dispatchEvent(new CustomEvent('timeExtended', {
+                detail: { extensionMinutes: data.extensionMinutes }
+              }));
+              console.log('Time extended by another client:', data.extensionMinutes, 'minutes');
+              break;
+            case 'NAVIGATE_TO_END_SESSION':
+              // App ended session -> Infotainment should also navigate to end session
+              console.log('App ended session, navigating to end-session');
+              navigate('/end-session');
+              break;
             default:
               console.log('Unhandled event:', data.event);
           }
